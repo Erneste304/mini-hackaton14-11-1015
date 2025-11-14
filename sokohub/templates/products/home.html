@@ -1,0 +1,78 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white py-5 mb-5 rounded">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">Welcome to Soko Hub</h1>
+        <p class="lead mb-4">Your trusted online marketplace for quality products</p>
+        <a href="{% url 'product_list' %}" class="btn btn-light btn-lg">
+            Start Shopping Now
+        </a>
+    </div>
+</div>
+
+<!-- Featured Products -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-4">Featured Products</h2>
+    </div>
+</div>
+
+{% if featured_products %}
+<div class="row">
+    {% for product in featured_products %}
+    <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card product-card h-100">
+            <div class="card-img-top-container" style="height: 200px; overflow: hidden;">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 100%; object-fit: cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                    <span class="text-muted">No Image</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ product.name|truncatewords:4 }}</h5>
+                <p class="card-text text-muted small mb-2">
+                    by {{ product.vendor.username }}
+                </p>
+                <p class="card-text flex-grow-1">
+                    {{ product.description|truncatewords:10 }}
+                </p>
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-primary">${{ product.price }}</strong>
+                        <span class="badge {% if product.is_in_stock %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if product.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}
+                        </span>
+                    </div>
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary w-100">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="text-center mt-4">
+    <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg">
+        View All Products
+    </a>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="fas fa-box-open fa-3x text-muted"></i>
+    </div>
+    <h4 class="text-muted">No Products Available</h4>
+    <p class="text-muted">Check back later for new products.</p>
+</div>
+{% endif %}
+{% endblock %}
