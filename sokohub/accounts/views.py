@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm
 from .decorators import vendor_required, customer_required
+from uuid import uuid4
 
 def register(request):
     """
@@ -41,10 +42,17 @@ def register(request):
 @login_required
 def profile(request):
     """
-    User profile page
+    User profile page -Simple version to avoid templates error
     """
+    # Redirect to appropriate profile based on user type
+    if request.user.is_vendor():
+        return redirect('vendor_dashboard')
+    else:
+        return redirect('customer_orders')
+    # Or use this simple template approach:
     context = {
-        'title': 'My Profile - Soko Hub'
+        'title': f'Profile - {request.user.username}',
+        'user': request.user
     }
     return render(request, 'accounts/profile.html', context)
 
@@ -67,3 +75,13 @@ def customer_profile(request):
         'title': 'Customer Profile - Soko Hub'
     }
     return render(request, 'accounts/customer_profile.html', context)
+
+@login_required
+def profile_redirect(request):
+    """
+    Redirect users from /accounts/profile/ to appropriate pages
+    """
+    if request.user.is_vendor():
+        return redirect('vendor_dashboard')
+    else:
+        return redirect('customer_orders')

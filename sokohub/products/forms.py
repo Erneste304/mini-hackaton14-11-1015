@@ -8,17 +8,24 @@ class ProductForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={
                 'rows': 4,
-                'placeholder': 'Enter detailed product description...'
+                'placeholder': 'Enter detailed product description...',
+                'class': 'form-control'
             }),
             'name': forms.TextInput(attrs={
-                'placeholder': 'Enter product name...'
+                'placeholder': 'Enter product name...',
+                'class': 'form-control'
             }),
             'price': forms.NumberInput(attrs={
                 'step': '0.01',
-                'min': '0.01'
+                'min': '0.01',
+                'class': 'form-control'
             }),
             'stock': forms.NumberInput(attrs={
-                'min': '0'
+                'min': '0',
+                'class': 'form-control'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control'
             })
         }
         labels = {
@@ -28,6 +35,11 @@ class ProductForm(forms.ModelForm):
             'stock': 'Stock Quantity',
             'image': 'Product Image'
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add CSRF token automatically (Django handles this, but we ensure form attributes)
+        self.use_required_attribute = True
 
     def clean_price(self):
         price = self.cleaned_data.get('price')

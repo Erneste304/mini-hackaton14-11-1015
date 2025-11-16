@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
 from accounts.decorators import vendor_required
 from .models import Product
 from .forms import ProductForm
 
+# Add the missing home view
 def home(request):
     """Homepage with featured products"""
     featured_products = Product.objects.filter(status='active').order_by('-created_at')[:8]
@@ -17,6 +19,7 @@ def home(request):
     }
     return render(request, 'products/home.html', context)
 
+# Add other essential views that might be missing
 def product_list(request):
     """Browse all active products"""
     products_list = Product.objects.filter(status='active').order_by('-created_at')
@@ -124,43 +127,3 @@ def add_product(request):
         'title': 'Add New Product'
     }
     return render(request, 'products/add_product.html', context)
-
-@vendor_required
-def edit_product(request, product_id):
-    """Edit existing product"""
-    product = get_object_or_404(Product, id=product_id, vendor=request.user)
-
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Product "{product.name}" updated successfully!')
-            return redirect('vendor_products')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = ProductForm(instance=product)
-
-    context = {
-        'form': form,
-        'product': product,
-        'title': f'Edit {product.name}'
-    }
-    return render(request, 'products/edit_product.html', context)
-
-@vendor_required
-def delete_product(request, product_id):
-    """Delete product"""
-    product = get_object_or_404(Product, id=product_id, vendor=request.user)
-
-    if request.method == 'POST':
-        product_name = product.name
-        product.delete()
-        messages.success(request, f'Product "{product_name}" deleted successfully!')
-        return redirect('vendor_products')
-
-    context = {
-        'product': product,
-        'title': f'Delete {product.name}'
-    }
-    return render(request, 'products/delete_product.html', context)

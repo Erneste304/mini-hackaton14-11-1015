@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.urls import reverse
+import uuid
 
 class Product(models.Model):
     STATUS_CHOICES = (
@@ -9,6 +10,8 @@ class Product(models.Model):
         ('inactive', 'Inactive'),
         ('out_of_stock', 'Out of Stock'),
     )
+    # Add UUID for security (hide sequential IDs)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     vendor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -45,7 +48,7 @@ class Product(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('product_detail', kwargs={'product_id': self.id})
+        return reverse('product_detail', kwargs={'product_uuid': self.uuid})
 
     def is_in_stock(self):
         return self.stock > 0 and self.status == 'active'

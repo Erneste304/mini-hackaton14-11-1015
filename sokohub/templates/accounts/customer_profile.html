@@ -1,0 +1,31 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Customer Profile</h4>
+                <p class="mb-0">Manage your shopping experience</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This is your customer profile page. Track your orders and shopping history here.
+                </div>
+
+                <div class="text-center">
+                    <a href="{% url 'customer_orders' %}" class="btn btn-info btn-lg me-3">
+                        <i class="fas fa-shopping-bag me-2"></i>View My Orders
+                    </a>
+                    <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-store me-2"></i>Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
