@@ -32,7 +32,17 @@ class Order(models.Model):
     phone = models.CharField(max_length=15)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    #status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    
+    def can_be_cancelled(self):
+        """" order can not only be cancelled if not shipped and delivered """
+        return self.status in ['pending', 'confirmed']
+        
+    def can_be_confirmed(self):
+        """" vendor can only be confirmed order pending"""
+        return self.status == 'pending'
+    
     class Meta:
         ordering = ['-created_at']
 
@@ -51,6 +61,7 @@ class Order(models.Model):
 
     def get_items_count(self):
         return self.items.count()
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(

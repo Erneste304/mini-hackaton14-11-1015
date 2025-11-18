@@ -10,6 +10,8 @@ urlpatterns = [
 
     # Vendor order routes
     path('vendor/orders/', views.vendor_orders, name='vendor_orders'),
+    path('vendor/orders/approve/<int:order_id>/', views.approve_order, name='approve_order'),
+    path('vendor/orders/cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
 
     # API routes
     path('api/check-stock/<int:product_id>/', views.check_stock, name='check_stock'),

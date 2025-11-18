@@ -123,9 +123,52 @@ def customer_orders(request):
 @vendor_required
 def vendor_orders(request):
     """Vendor's order management"""
-    order_items = OrderItem.objects.filter(product__vendor=request.user).select_related('order', 'product')
+    order_items = OrderItem.objects.filter(product__vendor=request.user).select_related('order', 'product').order_by('-created_at')
     return render(request, 'orders/vendor_orders.html', {'order_items': order_items})
+@vendor_required
+def approve_order(request, order_id):
+    """"Approve an order"""
+    order = get_object_or_404(Order, id=order_id)
+    
+    # check if order contain vendor products
+    vendor_items = order.items.filter(product__vendor=request.user)
+    if not vendor_items.exists():
+        messages.error(request, 'You can only approve orders containing your products.')
+        return redirect('vendor_orders')
 
+    if order.can_be_confirmed():
+        order.status = 'confirmed'
+        order.save()
+        messages.success(request, f"Order #{order.id} confirmed successfully!")
+    else:
+        messages.error(request, "This order cannot be confirmed.")
+
+    return redirect('vendor_orders')
+
+@vendor_required
+def cancel_order(request, order_id):
+    """Vendor cancels an order"""
+    order = get_object_or_404(Order, id=order_id)
+
+    vendor_items = order.items.filter(product__vendor=request.user)
+    if not vendor_items.exists():
+        messages.error(request, "You can only cancel orders containing your products.")
+        return redirect('vendor_orders')
+
+    if order.can_be_cancelled():
+        order.status = 'cancelled'
+
+        # Restore stock
+        for item in vendor_items:
+            item.product.stock += item.quantity
+            item.product.save()
+
+        order.save()
+        messages.success(request, f"Order #{order.id} cancelled.")
+    else:
+        messages.error(request, "This order cannot be cancelled.")
+
+    return redirect('vendor_orders')
 
 @login_required
 def check_stock(request, product_id):
