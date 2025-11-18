@@ -114,33 +114,19 @@ def order_detail(request, order_id):
     }
     return render(request, 'orders/order_detail.html', context)
 
+@customer_required
+def customer_orders(request):
+    """Customer's order history"""
+    orders = Order.objects.filter(customer=request.user).order_by('-created_at')
+    return render(request, 'orders/customer_orders.html', {'orders': orders})
+
 @vendor_required
 def vendor_orders(request):
-    """
-    Display all orders containing vendor's products
-    """
-    order_items = OrderItem.objects.filter(
-        product__vendor=request.user
-    ).select_related('order', 'product', 'order__customer').order_by('-order__created_at')
+    """Vendor's order management"""
+    order_items = OrderItem.objects.filter(product__vendor=request.user).select_related('order', 'product')
+    return render(request, 'orders/vendor_orders.html', {'order_items': order_items})
 
-    # Group by order for better display
-    orders_dict = {}
-    for item in order_items:
-        if item.order.id not in orders_dict:
-            orders_dict[item.order.id] = {
-                'order': item.order,
-                'items': []
-            }
-        orders_dict[item.order.id]['items'].append(item)
 
-    context = {
-        'order_items': order_items,
-        'grouped_orders': orders_dict.values(),
-        'title': 'Vendor Orders'
-    }
-    return render(request, 'orders/vendor_orders.html', context)
-
-# API-like view for stock check (optional)
 @login_required
 def check_stock(request, product_id):
     """

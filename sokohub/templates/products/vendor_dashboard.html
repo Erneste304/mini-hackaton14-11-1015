@@ -1,76 +1,83 @@
 ﻿{% extends 'base.html' %}
 
-{% block title %}Vendor Dashboard - Soko Hub{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Vendor Dashboard</h2>
-            <a href="{% url 'add_product' %}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Add New Product
-            </a>
-        </div>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ title }}</h2>
+    <a href="{% url 'add_product' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add New Product
+    </a>
 </div>
 
 <!-- Statistics Cards -->
 <div class="row mb-5">
-    <div class="col-md-3 mb-3">
-        <div class="card bg-primary text-white">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ total_products }}</h4>
-                        <p class="card-text">Total Products</p>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Products
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_products }}</div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-box fa-2x"></i>
+                    <div class="col-auto">
+                        <i class="fas fa-box fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card bg-success text-white">
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ active_products }}</h4>
-                        <p class="card-text">Active Products</p>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Active Products
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_products }}</div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-check-circle fa-2x"></i>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card bg-warning text-white">
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ out_of_stock_products }}</h4>
-                        <p class="card-text">Out of Stock</p>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Pending Orders
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_orders }}</div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    <div class="col-auto">
+                        <i class="fas fa-shopping-bag fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card bg-info text-white">
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="card-title">{{ total_inventory_value|floatformat:2 }}</h4>
-                        <p class="card-text">Inventory Value ($)</p>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Total Revenue
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_revenue }}</div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-dollar-sign fa-2x"></i>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -78,72 +85,63 @@
     </div>
 </div>
 
-<!-- Recent Products -->
 <div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Recent Products</h5>
+    <!-- Recent Products -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Products</h6>
+                <a href="{% url 'vendor_products' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
                 {% if recent_products %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Product Name</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for product in recent_products %}
-                        <tr>
-                            <td>
-                                {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                                     class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                                {% else %}
-                                <div class="bg-light d-flex align-items-center justify-content-center"
-                                     style="width: 50px; height: 50px;">
-                                    <i class="fas fa-image text-muted"></i>
-                                </div>
-                                {% endif %}
-                            </td>
-                            <td>{{ product.name }}</td>
-                            <td>${{ product.price }}</td>
-                            <td>
-                                    <span class="{% if product.stock == 0 %}text-danger{% endif %}">
-                                        {{ product.stock }}
-                                    </span>
-                            </td>
-                            <td>
-                                    <span class="badge bg-{% if product.status == 'active' %}success{% else %}warning{% endif %}">
-                                        {{ product.get_status_display }}
-                                    </span>
-                            </td>
-                            <td>
-                                <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="list-group list-group-flush">
+                    {% for product in recent_products %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ product.name }}</h6>
+                            <small class="text-muted">${{ product.price }} • Stock: {{ product.stock }}</small>
+                        </div>
+                        <span class="badge bg-{% if product.status == 'active' %}success{% else %}secondary{% endif %}">
+                                {{ product.get_status_display }}
+                            </span>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No Products Yet</h5>
-                    <p class="text-muted">Start by adding your first product!</p>
-                    <a href="{% url 'add_product' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Add Your First Product
-                    </a>
+                <p class="text-muted text-center">No products yet. <a href="{% url 'add_product' %}">Add your first product</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                <a href="{% url 'vendor_orders' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_orders %}
+                <div class="list-group list-group-flush">
+                    {% for order_item in recent_orders %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ order_item.product.name }}</h6>
+                                <small class="text-muted">Qty: {{ order_item.quantity }} • ${{ order_item.price }}</small>
+                            </div>
+                            <span class="badge bg-{{ order_item.order.get_status_color }}">
+                                    {{ order_item.order.get_status_display }}
+                                </span>
+                        </div>
+                        <small class="text-muted">Order #{{ order_item.order.id }} • {{ order_item.order.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-muted text-center">No orders yet.</p>
                 {% endif %}
             </div>
         </div>
@@ -152,33 +150,38 @@
 
 <!-- Quick Actions -->
 <div class="row mt-4">
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
-                <h5>Add Product</h5>
-                <p class="text-muted">List a new product for sale</p>
-                <a href="{% url 'add_product' %}" class="btn btn-primary">Add Product</a>
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="fas fa-boxes fa-3x text-success mb-3"></i>
-                <h5>Manage Products</h5>
-                <p class="text-muted">View and edit all your products</p>
-                <a href="{% url 'vendor_products' %}" class="btn btn-success">View All</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="fas fa-shopping-bag fa-3x text-info mb-3"></i>
-                <h5>View Orders</h5>
-                <p class="text-muted">Check customer orders</p>
-                <a href="{% url 'vendor_orders' %}" class="btn btn-info">View Orders</a>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <a href="{% url 'add_product' %}" class="btn btn-primary btn-circle btn-lg">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        <p class="mt-2 mb-0">Add Product</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <a href="{% url 'vendor_products' %}" class="btn btn-success btn-circle btn-lg">
+                            <i class="fas fa-box"></i>
+                        </a>
+                        <p class="mt-2 mb-0">Manage Products</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <a href="{% url 'vendor_orders' %}" class="btn btn-warning btn-circle btn-lg">
+                            <i class="fas fa-shopping-bag"></i>
+                        </a>
+                        <p class="mt-2 mb-0">View Orders</p>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <a href="{% url 'product_list' %}" class="btn btn-info btn-circle btn-lg">
+                            <i class="fas fa-store"></i>
+                        </a>
+                        <p class="mt-2 mb-0">Browse Market</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

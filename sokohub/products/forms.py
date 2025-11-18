@@ -4,7 +4,7 @@ from .models import Product
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'stock', 'image']
+        fields = ['name', 'description', 'price', 'stock', 'image', 'status']
         widgets = {
             'description': forms.Textarea(attrs={
                 'rows': 4,
@@ -24,22 +24,16 @@ class ProductForm(forms.ModelForm):
                 'min': '0',
                 'class': 'form-control'
             }),
-            'image': forms.FileInput(attrs={
-                'class': 'form-control'
-            })
+            'status': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'name': 'Product Name',
             'description': 'Product Description',
             'price': 'Price ($)',
             'stock': 'Stock Quantity',
-            'image': 'Product Image'
+            'image': 'Product Image',
+            'status': 'Product Status'
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Add CSRF token automatically (Django handles this, but we ensure form attributes)
-        self.use_required_attribute = True
 
     def clean_price(self):
         price = self.cleaned_data.get('price')
@@ -52,9 +46,3 @@ class ProductForm(forms.ModelForm):
         if stock < 0:
             raise forms.ValidationError("Stock cannot be negative.")
         return stock
-
-    def clean_name(self):
-        name = self.cleaned_data.get('name')
-        if len(name.strip()) < 3:
-            raise forms.ValidationError("Product name must be at least 3 characters long.")
-        return name.strip()

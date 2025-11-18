@@ -40,7 +40,6 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.customer.username}"
 
     def get_status_color(self):
-        """Return Bootstrap color class for status badge"""
         status_colors = {
             'pending': 'warning',
             'confirmed': 'info',
@@ -51,7 +50,6 @@ class Order(models.Model):
         return status_colors.get(self.status, 'secondary')
 
     def get_items_count(self):
-        """Return total number of items in this order"""
         return self.items.count()
 
 class OrderItem(models.Model):
@@ -81,5 +79,4 @@ class OrderItem(models.Model):
         return f"{self.quantity} x {self.product.name} (Order #{self.order.id})"
 
     def get_subtotal(self):
-        """Calculate subtotal for this order item"""
         return self.quantity * self.price

@@ -7,6 +7,8 @@ from django.db.models import Q
 from accounts.decorators import vendor_required
 from .models import Product
 from .forms import ProductForm
+from django.db.models import Count, Sum
+from orders.models import OrderItem
 
 # Add the missing home view
 def home(request):
@@ -58,31 +60,33 @@ def product_list(request):
 
 def product_detail(request, product_id):
     """Product detail page"""
-    product = get_object_or_404(Product, id=product_id)
+    try:
+        product = get_object_or_404(Product, id=product_id, status='active')
 
-    # Get related products (same vendor)
-    related_products = Product.objects.filter(
-        vendor=product.vendor,
-        status='active'
-    ).exclude(id=product.id).order_by('-created_at')[:4]
+        # Get related products from the same vendor
+        related_products = Product.objects.filter(
+            vendor=product.vendor,
+            status='active'
+        ).exclude(id=product.id).order_by('-created_at')[:4]
 
-    context = {
-        'product': product,
-        'related_products': related_products,
-        'title': product.name
-    }
-    return render(request, 'products/product_detail.html', context)
+        context = {
+            'product': product,
+            'related_products': related_products,
+            'title': product.name
+        }
+        return render(request, 'products/product_detail.html', context)
+
+    except Product.DoesNotExist:
+        raise Http404("Product does not exist")
 
 @vendor_required
 def vendor_dashboard(request):
-    """Vendor dashboard with stats"""
     products = Product.objects.filter(vendor=request.user)
     active_products = products.filter(status='active')
     out_of_stock_products = products.filter(status='out_of_stock')
 
     # Calculate total value of inventory
     total_inventory_value = sum(product.price * product.stock for product in active_products)
-
     recent_products = products.order_by('-created_at')[:5]
 
     context = {
@@ -95,9 +99,11 @@ def vendor_dashboard(request):
     }
     return render(request, 'products/vendor_dashboard.html', context)
 
+
 @vendor_required
 def vendor_products(request):
-    """Vendor's product management page"""
+    """Vendor's product management page - SIMPLE VERSION"""
+    # Get all products for this vendor
     products = Product.objects.filter(vendor=request.user).order_by('-created_at')
 
     context = {
@@ -105,25 +111,63 @@ def vendor_products(request):
         'title': 'My Products'
     }
     return render(request, 'products/vendor_products.html', context)
-
 @vendor_required
 def add_product(request):
-    """Add new product"""
+    """Add new product with image upload"""
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.vendor = request.user
+        try:
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            price = request.POST.get('price')
+            stock = request.POST.get('stock')
+            image = request.FILES.get('image')
+
+            # Validation
+            if not name or not price or not stock:
+                messages.error(request, 'Please fill all required fields.')
+                return render(request, 'products/add_product.html')
+
+            # Create product
+            product = Product(
+                vendor=request.user,
+                name=name,
+                description=description or '',
+                price=float(price),
+                stock=int(stock)
+            )
+
+            # Handle image upload
+            if image:
+                product.image = image
+
             product.save()
-            messages.success(request, f'Product "{product.name}" added successfully!')
+            messages.success(request, f'Product "{name}" added successfully!')
+            return redirect('vendor_products')
+
+        except Exception as e:
+            messages.error(request, f'Error creating product: {str(e)}')
+
+    return render(request, 'products/add_product.html')
+
+@vendor_required
+def edit_product(request, product_id):
+    """Edit existing product"""
+    product = get_object_or_404(Product, id=product_id, vendor=request.user)
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Product "{product.name}" updated successfully!')
             return redirect('vendor_products')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        form = ProductForm()
+        form = ProductForm(instance=product)
 
     context = {
         'form': form,
-        'title': 'Add New Product'
+        'product': product,
+        'title': f'Edit {product.name}'
     }
-    return render(request, 'products/add_product.html', context)
+    return render(request, 'products/edit_product.html', context)
