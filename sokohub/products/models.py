@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import URLValidator, MinValueValidator
 from django.urls import reverse
 import uuid
 
@@ -12,6 +12,26 @@ class Product(models.Model):
     )
     # Add UUID for security (hide sequential IDs)
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+
+    image_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        validators=[URLValidator()],
+        help_text="Optional URL for the product image."
+    )
+
+    def get_image_display(self):
+        if self.image_url:
+            return self.image_url
+        elif self.image:
+            return self.image.url
+        else:
+            return None
+    
+    def __str__(self):
+        return self.name
 
     vendor = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -62,106 +62,139 @@
                 </li>
 
                 {% if user.is_authenticated %}
-                {% if user.is_vendor %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'vendor_dashboard' %}">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'vendor_products' %}">My Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'vendor_orders' %}">Orders</a>
-                </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'customer_orders' %}">My Orders</a>
-                </li>
-                {% endif %}
+                    {% if user.is_vendor %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'vendor_dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'vendor_products' %}">My Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'vendor_orders' %}">Orders</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'customer_orders' %}">My Orders</a>
+                        </li>
+                    {% endif %}
                 {% endif %}
             </ul>
 
             <!-- Right Navigation Menu - USER SECTION -->
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
-                <!-- Shopping Cart for Customers -->
-                {% if user.is_customer %}
-                <li class="nav-item">
-                    <a class="nav-link position-relative" href="#" title="Shopping Cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    0
-                                </span>
-                    </a>
-                </li>
-                {% endif %}
+                    <!-- 🔔 UPDATED: Vendor Notifications -->
+                    {% if user.is_vendor %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="notificationDropdown" 
+                           role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            {% if pending_orders_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ pending_orders_count }}
+                                <span class="visually-hidden">unread notifications</span>
+                            </span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            {% if pending_orders_count > 0 %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'vendor_orders' %}">
+                                    <i class="fas fa-shopping-cart text-warning me-2"></i>
+                                    {{ pending_orders_count }} pending order{{ pending_orders_count|pluralize }}
+                                </a>
+                            </li>
+                            {% else %}
+                            <li><a class="dropdown-item text-muted" href="#">No new notifications</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'vendor_orders' %}"><i class="fas fa-eye me-2"></i>View all orders</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
 
-                <!-- Notifications for All Users -->
-                <li class="nav-item">
-                    <a class="nav-link position-relative" href="#" title="Notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-                                    0
-                                </span>
-                    </a>
-                </li>
+                    <!-- Shopping Cart for Customers -->
+                    {% if user.is_customer %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="#" title="Shopping Cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                0
+                            </span>
+                        </a>
+                    </li>
+                    {% endif %}
 
-                <!-- User Dropdown Menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user me-1"></i>
-                        {{ user.username }}
-                        <small class="badge bg-light text-dark ms-1">
-                            {{ user.get_user_type_display }}
-                        </small>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-user-circle me-2"></i>My Profile
-                            </a>
-                        </li>
+                    <!-- ❌ REMOVED: Old generic notifications for all users -->
+                    <!-- This was removed: 
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="#" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                                0
+                            </span>
+                        </a>
+                    </li>
+                    -->
 
-                        <!-- Role-specific Links -->
-                        {% if user.is_vendor %}
-                        <li>
-                            <a class="dropdown-item" href="{% url 'vendor_dashboard' %}">
-                                <i class="fas fa-tachometer-alt me-2"></i>Vendor Dashboard
-                            </a>
-                        </li>
-                        {% else %}
-                        <li>
-                            <a class="dropdown-item" href="{% url 'customer_orders' %}">
-                                <i class="fas fa-shopping-bag me-2"></i>My Orders
-                            </a>
-                        </li>
-                        {% endif %}
+                    <!-- User Dropdown Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>
+                            {{ user.username }}
+                            <small class="badge bg-light text-dark ms-1">
+                                {{ user.get_user_type_display }}
+                            </small>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user-circle me-2"></i>My Profile
+                                </a>
+                            </li>
 
-                        <li><hr class="dropdown-divider"></li>
+                            <!-- Role-specific Links -->
+                            {% if user.is_vendor %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'vendor_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Vendor Dashboard
+                                </a>
+                            </li>
+                            {% else %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'customer_orders' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i>My Orders
+                                </a>
+                            </li>
+                            {% endif %}
 
-                        <!-- Logout Form -->
-                        <li>
-                            <form method="post" action="{% url 'logout' %}" class="dropdown-logout-form">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-logout-btn dropdown-item">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- Logout Form -->
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="dropdown-logout-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-logout-btn dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
                 {% else %}
-                <!-- Show when user is NOT logged in -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">
-                        <i class="fas fa-sign-in-alt me-1"></i>Login
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">
-                        <i class="fas fa-user-plus me-1"></i>Register
-                    </a>
-                </li>
+                    <!-- Show when user is NOT logged in -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
         </div>
@@ -171,12 +204,12 @@
 <!-- Main Content -->
 <main class="container mt-4 mb-5">
     {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    {% endfor %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
     {% endif %}
 
     {% block content %}

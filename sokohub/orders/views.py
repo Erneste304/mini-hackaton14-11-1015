@@ -15,6 +15,30 @@ def checkout(request, product_id):
     """
     product = get_object_or_404(Product, id=product_id, status='active')
 
+    print("================== Checkout Process Started ==================")
+    print(f"product: {product.name}")
+    print(f"vendor: {product.vendor.username}")
+    print(f"product ID: {product.id}")
+
+    if request.method == 'POST':
+        order = Order.objects.create(
+            customer = request.user,
+            total = total,
+            delivery_address = delivery_address,
+            phone = phone,
+        )
+
+        order_item = OrderItem.objects.create(
+            order = order,
+            product = product,
+            quantity = quantity,
+            price = product.price,
+        )
+        print(f"Order created with ID: {order.id}")
+        print(f"ordrer_item created for product: {product.name}")
+        print(f"Vendor should see this order: {product.vendor.username}")
+
+
     # Check if product is in stock
     if not product.is_in_stock():
         messages.error(request, 'Sorry, this product is currently out of stock.')
@@ -122,52 +146,98 @@ def customer_orders(request):
 
 @vendor_required
 def vendor_orders(request):
-    """Vendor's order management"""
-    order_items = OrderItem.objects.filter(product__vendor=request.user).select_related('order', 'product').order_by('-created_at')
-    return render(request, 'orders/vendor_orders.html', {'order_items': order_items})
+    """Vendor's order management page"""
+    # Get all order items for vendor's products
+    order_items = OrderItem.objects.filter(
+        product__vendor=request.user
+    ).select_related('order', 'product', 'order__customer').order_by('-order__created_at')
+    
+    # Count pending orders for notifications
+    pending_count = order_items.filter(order__status='pending').count()
+    
+    print(f"=== VENDOR ORDERS ===")
+    print(f"Vendor: {request.user.username}")
+    print(f"Total orders: {order_items.count()}")
+    print(f"Pending orders: {pending_count}")
+    
+    context = {
+        'order_items': order_items,
+        'pending_count': pending_count,
+        'title': 'Vendor Orders'
+    }
+    return render(request, 'orders/vendor_orders.html', context)
+
 @vendor_required
 def approve_order(request, order_id):
-    """"Approve an order"""
+    """Vendor approves an order"""
     order = get_object_or_404(Order, id=order_id)
-    
-    # check if order contain vendor products
     vendor_items = order.items.filter(product__vendor=request.user)
     if not vendor_items.exists():
-        messages.error(request, 'You can only approve orders containing your products.')
+        messages.error(request, "You can only approve orders containing your products.")
         return redirect('vendor_orders')
-
+    
     if order.can_be_confirmed():
         order.status = 'confirmed'
         order.save()
-        messages.success(request, f"Order #{order.id} confirmed successfully!")
+        
+
+        for item in vendor_items:
+            if item.product.stock >= item.quantity:
+                item.product.stock -= item.quantity
+                item.product.save()
+                print(f"Stock updated: {item.product.name} -{item.quantity}")
+            else:
+                messages.warning(request, 
+                    f"Insufficient stock for {item.product.name}. " +
+                    "Please update your inventory."
+                )
+        
+        messages.success(request, 
+            f"Order #{order.id} confirmed! " +
+            f"Stock has been updated and customer has been notified."
+        )
+        
+        print(f"=== ORDER APPROVED ===")
+        print(f"Order: #{order.id}")
+        print(f"Vendor: {request.user.username}")
+        print(f"Customer: {order.customer.username}")
+        
     else:
         messages.error(request, "This order cannot be confirmed.")
-
+    
     return redirect('vendor_orders')
+
+
 
 @vendor_required
 def cancel_order(request, order_id):
     """Vendor cancels an order"""
     order = get_object_or_404(Order, id=order_id)
-
+    
     vendor_items = order.items.filter(product__vendor=request.user)
     if not vendor_items.exists():
         messages.error(request, "You can only cancel orders containing your products.")
         return redirect('vendor_orders')
-
+    
     if order.can_be_cancelled():
         order.status = 'cancelled'
-
-        # Restore stock
-        for item in vendor_items:
-            item.product.stock += item.quantity
-            item.product.save()
-
         order.save()
-        messages.success(request, f"Order #{order.id} cancelled.")
+        
+        # If order was confirmed, restore stock
+        if order.status == 'confirmed':
+            for item in vendor_items:
+                item.product.stock += item.quantity
+                item.product.save()
+        
+        messages.success(request, f"Order #{order.id} has been cancelled.")
+        
+        print(f"=== ORDER CANCELLED ===")
+        print(f"Order: #{order.id}")
+        print(f"Vendor: {request.user.username}")
+        
     else:
         messages.error(request, "This order cannot be cancelled.")
-
+    
     return redirect('vendor_orders')
 
 @login_required

@@ -10,23 +10,23 @@ from .forms import ProductForm
 from django.db.models import Count, Sum
 from orders.models import OrderItem
 
-# Add the missing home view
+
 def home(request):
-    """Homepage with featured products"""
+    """Homepage view"""
     featured_products = Product.objects.filter(status='active').order_by('-created_at')[:8]
 
     context = {
         'featured_products': featured_products,
-        'title': 'Soko Hub - Online Marketplace'
+        'title': 'Soko Hub - Online Marketplace created by Erneste304portfolio'
     }
     return render(request, 'products/home.html', context)
 
-# Add other essential views that might be missing
+
 def product_list(request):
     """Browse all active products"""
     products_list = Product.objects.filter(status='active').order_by('-created_at')
 
-    # Search functionality
+    
     search_query = request.GET.get('search', '')
     if search_query:
         products_list = products_list.filter(
@@ -63,7 +63,7 @@ def product_detail(request, product_id):
     try:
         product = get_object_or_404(Product, id=product_id, status='active')
 
-        # Get related products from the same vendor
+
         related_products = Product.objects.filter(
             vendor=product.vendor,
             status='active'
