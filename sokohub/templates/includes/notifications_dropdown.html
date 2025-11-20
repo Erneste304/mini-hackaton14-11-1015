@@ -1,0 +1,44 @@
+<li class="nav-item dropdown">
+    <a class="nav-link position-relative" href="#" id="notificationDropdown" 
+       role="button" data-bs-toggle="dropdown">
+        <i class="fas fa-bell"></i>
+        {% if unread_notifications_count > 0 %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ unread_notifications_count }}
+            <span class="visually-hidden">unread notifications</span>
+        </span>
+        {% endif %}
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" style="width: 300px;">
+        <li><h6 class="dropdown-header">Notifications</h6></li>
+        
+        {% if recent_notifications %}
+            {% for notification in recent_notifications %}
+            <li>
+                <a class="dropdown-item {% if not notification.is_read %}bg-light{% endif %}" 
+                   href="{% url 'mark_notification_read' notification.id %}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ notification.title }}</h6>
+                        <small>{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                    <p class="mb-1 small">{{ notification.message|truncatewords:10 }}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-{{ notification.notification_type }} me-1"></i>
+                        {{ notification.get_notification_type_display }}
+                    </small>
+                </a>
+            </li>
+            {% if not forloop.last %}<li><hr class="dropdown-divider"></li>{% endif %}
+            {% endfor %}
+        {% else %}
+            <li><a class="dropdown-item text-muted" href="#">No notifications</a></li>
+        {% endif %}
+        
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <a class="dropdown-item text-center" href="{% url 'all_notifications' %}">
+                <i class="fas fa-eye me-2"></i>View All Notifications
+            </a>
+        </li>
+    </ul>
+</li>

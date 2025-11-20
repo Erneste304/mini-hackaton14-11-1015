@@ -2,42 +2,40 @@
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
 
-class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField(
-        required=True,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Enter your email address'
-        })
-    )
-    user_type = forms.ChoiceField(
-        choices=User.USER_TYPE_CHOICES,
-        widget=forms.RadioSelect,
-        initial='customer'
-    )
-    phone = forms.CharField(
-        max_length=15,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'e.g., +255712345678'
-        })
-    )
-    location = forms.CharField(
-        max_length=255,
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'e.g., Dar es Salaam, Tanzania'
-        })
-    )
-
+class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 'user_type', 'phone', 'location']
+        fields = [
+            'first_name', 'last_name', 'email', 'phone', 'location',
+            'profile_picture', 'address', 'date_of_birth', 'city', 'country',
+            'email_notifications', 'sms_notifications'
+        ]
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'country': forms.TextInput(attrs={'class': 'form-control'}),
         }
+        labels = {
+            'profile_picture': 'Profile Picture',
+            'email_notifications': 'Recive Email Notifications',
+            'sms_notifications': 'Receive SMS Notifications',
+        }
+
+
+class UserRegistrationForm(UserCreationForm):
+    profile_picture = forms.ImageField(
+        required=False, 
+        help_text='Upload a profile picture (optional)'
+    )
+    
+    class Meta:
+        model = User  
+        fields = ('username', 'email', 'password1', 'password2') 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1,25 +1,39 @@
-from orders.models import OrderItem
+from notifications.models import Notification
 
-def vendor_notifications(request):
-    """Add vendor notification data to all templates"""
-    context = {'pending_orders_count': 0}
+def user_notifications(request):
+    """Add notification data to all templates"""
+    context = {}
     
-    try:
-        # Only process if user is authenticated and is a vendor
-        if request.user.is_authenticated and hasattr(request.user, 'is_vendor') and request.user.is_vendor():
-            pending_orders_count = OrderItem.objects.filter(
-                product__vendor=request.user,
-                order__status='pending' 
-            ).count()
-            
-            context['pending_orders_count'] = pending_orders_count
-            
-            print(f"=== NOTIFICATIONS ===")
-            print(f"Vendor: {request.user.username}")
-            print(f"Pending orders: {pending_orders_count}")
-            
-    except Exception as e:
-        print(f"Notification context error: {e}")
-        context['pending_orders_count'] = 0
+    if request.user.is_authenticated:
+        # Count unread notifications
+        unread_count = Notification.objects.filter(
+            user=request.user, 
+            is_read=False
+        ).count()
+        
+        # Get recent notifications
+        recent_notifications = Notification.objects.filter(
+            user=request.user
+        ).order_by('-created_at')[:5]
+        
+        context.update({
+            'unread_notifications_count': unread_count,
+            'recent_notifications': recent_notifications,
+        })
     
     return context
+
+def vendor_notifications(request):
+    """
+    Context processor for vendor notifications
+    """
+    notifications = []
+    unread_count = 0
+
+    if request.user.is_authenticated and hasattr(request.user, 'vendor_profile'):
+
+        pass
+
+    return {
+        'vendor_notifications': notifications,
+        'vendor_unread_notifications_count': unread_count,}

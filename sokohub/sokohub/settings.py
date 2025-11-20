@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'accounts',
     'products',
     'orders',
+    'notifications',
+    'cart'
     
 ]
 
@@ -68,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sokohub.context_processors.vendor_notifications',
+                
             ],
         },
     },

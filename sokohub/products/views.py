@@ -13,7 +13,10 @@ from orders.models import OrderItem
 
 def home(request):
     """Homepage view"""
-    featured_products = Product.objects.filter(status='active').order_by('-created_at')[:8]
+    try:
+        featured_products = Product.objects.filter(status='active').order_by('-created_at')[:8]
+    except Product.DoesNotExist:
+        featured_products = []
 
     context = {
         'featured_products': featured_products,

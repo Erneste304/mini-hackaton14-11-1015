@@ -12,8 +12,11 @@
                 <p class="mb-0 small">Create your account to start buying or selling</p>
             </div>
             <div class="card-body">
-                <form method="post" novalidate>
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
+                    {{ form.as_p }}
+                     <button type="submit">Register</button>
+                     </form>
 
                     <!-- User Type Selection -->
                     <div class="mb-4">
