@@ -5,34 +5,22 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm
 from .decorators import vendor_required, customer_required
 from uuid import uuid4
-from .forms import ProfileUpdateForm
-from .models import UserProfile
+
 
 def register(request):
     """
     Handle user registration for both vendors and customers
     """
     if request.method == 'POST':
-        form = UserRegistrationForm(request.POST, request.FILES)  # ADD request.FILES here
+        form = UserRegistrationForm(request.POST, request.FILES)  
         if form.is_valid():
-            user = form.save(commit=False)  # Don't save to database yet
-            
-            # Save the user first (without profile_picture)
-            user.save()
-            
-            # Now create UserProfile with the profile picture
-            profile_picture = form.cleaned_data.get('profile_picture')
-            UserProfile.objects.create(
-                user=user,
-                profile_picture=profile_picture
-            )
-            
-            # Log the user in after registration
+            user  = form.save()
+            # Automatically log the user in after registration
             login(request, user)
 
             messages.success(
                 request,
-                f'Account created successfully! Welcome to Soko Hub, {user.username}.'
+                f'Congratulation Account created successfully! Welcome to Soko Hub, {user.username}.'
             )
 
             # Redirect based on user type
@@ -103,3 +91,15 @@ def profile_redirect(request):
         return redirect('vendor_dashboard')
     else:
         return redirect('customer_orders')
+    
+@login_required
+def all_notifications(request):
+    """
+    View for all notifications
+    """
+    # Simple implementation for now
+    context = {
+        'title': 'Notifications - Soko Hub',
+        'notifications': []  # Empty for now
+    }
+    return render(request, 'accounts/notifications.html', context)

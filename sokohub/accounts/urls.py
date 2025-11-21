@@ -25,4 +25,7 @@ urlpatterns = [
 
     # Use this for actual profile page
     path('profile/', views.profile, name='profile'),
+
+    #notification path
+    path('notifications/', views.all_notifications, name='all_notifications'),
 ]
