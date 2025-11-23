@@ -15,30 +15,6 @@ def checkout(request, product_id):
     """
     product = get_object_or_404(Product, id=product_id, status='active')
 
-    print("================== Checkout Process Started ==================")
-    print(f"product: {product.name}")
-    print(f"vendor: {product.vendor.username}")
-    print(f"product ID: {product.id}")
-
-    if request.method == 'POST':
-        order = Order.objects.create(
-            customer = request.user,
-            total = total,
-            delivery_address = delivery_address,
-            phone = phone,
-        )
-
-        order_item = OrderItem.objects.create(
-            order = order,
-            product = product,
-            quantity = quantity,
-            price = product.price,
-        )
-        print(f"Order created with ID: {order.id}")
-        print(f"ordrer_item created for product: {product.name}")
-        print(f"Vendor should see this order: {product.vendor.username}")
-
-
     # Check if product is in stock
     if not product.is_in_stock():
         messages.error(request, 'Sorry, this product is currently out of stock.')
@@ -84,7 +60,6 @@ def checkout(request, product_id):
 
             except Exception as e:
                 messages.error(request, f'Error placing order: {str(e)}')
-                # You might want to log this error in production
 
     else:
         # Pre-fill form with user data

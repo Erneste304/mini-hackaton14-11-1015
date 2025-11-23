@@ -94,12 +94,4 @@ def profile_redirect(request):
     
 @login_required
 def all_notifications(request):
-    """
-    View for all notifications
-    """
-    # Simple implementation for now
-    context = {
-        'title': 'Notifications - Soko Hub',
-        'notifications': []  # Empty for now
-    }
-    return render(request, 'accounts/notifications.html', context)
+    return render(request, 'accounts/notifications.html', {'title': 'Notifications - Soko Hub'})
