@@ -3,26 +3,115 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h4 class="mb-0">Vendor Profile</h4>
-                <p class="mb-0">Manage your vendor account and products</p>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Vendor Panel</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'vendor_dashboard' %}">
+                            📊 Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            📦 Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            🛒 Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            💰 Earnings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">
+                            👤 Profile
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    This is your vendor-specific profile page. Use the vendor dashboard for detailed analytics.
-                </div>
+        </div>
 
-                <div class="text-center">
-                    <a href="{% url 'vendor_dashboard' %}" class="btn btn-warning btn-lg me-3">
-                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
-                    </a>
-                    <a href="{% url 'vendor_products' %}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-box me-2"></i>Manage Products
-                    </a>
+        <!-- Main content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Vendor Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <!-- Single Notification Bell -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            🔔 <span class="badge bg-danger">3</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">New order received</a></li>
+                            <li><a class="dropdown-item" href="#">Product review pending</a></li>
+                            <li><a class="dropdown-item" href="#">Weekly report ready</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Products</h5>
+                            <h2 class="card-text">15</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Orders Today</h5>
+                            <h2 class="card-text">8</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Orders</h5>
+                            <h2 class="card-text">3</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Earnings</h5>
+                            <h2 class="card-text">$450</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">New order #1234 received</li>
+                                <li class="list-group-item">Product "Smartphone" was reviewed</li>
+                                <li class="list-group-item">Payment of $150 received</li>
+                                <li class="list-group-item">New customer registered</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
