@@ -29,3 +29,5 @@ urlpatterns = [
     #notification path
     path('notifications/', views.all_notifications, name='all_notifications'),
 ]
+
+path('debug/', views.debug_profile_pic, name='debug_pic'),

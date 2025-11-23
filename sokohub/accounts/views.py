@@ -14,13 +14,22 @@ def register(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST, request.FILES)  
         if form.is_valid():
-            user  = form.save()
+            user = form.save()
+            
+            # DEBUG: Check if profile picture was saved
+            if user.profile_picture:
+                print(f"✅ Profile picture saved: {user.profile_picture}")
+                print(f"✅ File path: {user.profile_picture.path}")
+                print(f"✅ File URL: {user.profile_picture.url}")
+            else:
+                print("❌ No profile picture saved")
+            
             # Automatically log the user in after registration
             login(request, user)
 
             messages.success(
                 request,
-                f'Congratulation Account created successfully! Welcome to Soko Hub, {user.username}.'
+                f'Congratulations! Account created successfully! Welcome to Soko Hub, {user.username}.'
             )
 
             # Redirect based on user type
@@ -95,3 +104,11 @@ def profile_redirect(request):
 @login_required
 def all_notifications(request):
     return render(request, 'accounts/notifications.html', {'title': 'Notifications - Soko Hub'})
+
+def debug_profile_pic(request):
+    user = request.user
+    return render(request, 'accounts/debug.html', {
+        'user': user,
+        'has_pic': bool(user.profile_picture),
+        'pic_url': user.profile_picture.url if user.profile_picture else 'No pic'
+    })

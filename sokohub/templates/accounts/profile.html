@@ -10,8 +10,21 @@
             <!-- Profile Card -->
             <div class="card">
                 <div class="card-body text-center">
-                    <img src="{{ user.get_profile_picture_url }}" alt="Profile Picture" 
-                         class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    <!-- PROFILE PICTURE - SINGLE VERSION -->
+                    <div class="profile-picture mb-3">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" 
+                                 alt="{{ user.username }}" 
+                                 class="rounded-circle" 
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 150px; height: 150px;">
+                                <span class="text-white h4">{{ user.username|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
                     <h4>{{ user.get_full_name|default:user.username }}</h4>
                     <p class="text-muted">{{ user.email }}</p>
                     <span class="badge bg-info">{{ user.get_user_type_display }}</span>
@@ -23,13 +36,15 @@
                 <div class="card-body">
                     <h6>Account Summary</h6>
                     <div class="d-flex justify-content-between">
-                        <span>Total Orders:</span>
-                        <strong>{{ user.customer_orders.count }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
                         <span>Member Since:</span>
                         <strong>{{ user.date_joined|date:"M Y" }}</strong>
                     </div>
+                    {% if user.is_customer %}
+                    <div class="d-flex justify-content-between">
+                        <span>Total Orders:</span>
+                        <strong>{{ user.order_set.count }}</strong>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -55,11 +70,18 @@
                         {{ form.email|as_crispy_field }}
                         {{ form.phone|as_crispy_field }}
                         
+                        <!-- Profile Picture Upload -->
                         <div class="mb-3">
                             <label class="form-label">Profile Picture</label>
-                            <input type="file" name="profile_picture" class="form-control">
+                            <input type="file" name="profile_picture" class="form-control" accept="image/*">
                             {% if user.profile_picture %}
-                            <small class="form-text text-muted">Current: {{ user.profile_picture.name }}</small>
+                                <small class="form-text text-success">
+                                    Current picture: {{ user.profile_picture.name }}
+                                </small>
+                            {% else %}
+                                <small class="form-text text-muted">
+                                    Upload a profile picture (optional)
+                                </small>
                             {% endif %}
                         </div>
                         
@@ -74,17 +96,25 @@
                             </div>
                         </div>
                         
+                        <!-- Notification Preferences -->
                         <div class="mb-3">
                             <h6>Notification Preferences</h6>
                             <div class="form-check">
                                 {{ form.email_notifications }}
-                                <label class="form-check-label" for="{{ form.email_notifications.id_for_label }}">
+                                <label class="form-check-label">
                                     Email Notifications
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.sms_notifications }}
+                                <label class="form-check-label">
+                                    SMS Notifications
                                 </label>
                             </div>
                         </div>
                         
                         <button type="submit" class="btn btn-primary">Update Profile</button>
+                        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>
