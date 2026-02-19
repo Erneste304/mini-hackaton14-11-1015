@@ -8,6 +8,7 @@ from products.models import Product
 from cart.models import Cart
 from .models import Order, OrderItem
 from .forms import CheckoutForm
+from notifications.models import Notification
 
 @customer_required
 def checkout_cart(request):
@@ -65,6 +66,14 @@ def checkout_cart(request):
                             )
                             item.product.stock -= item.quantity
                             item.product.save()
+
+                        # Create notification for vendor
+                        Notification.objects.create(
+                            user=vendor,
+                            title="New Order Received",
+                            message=f"You have a new order (# {order.id}) for {v_items.__len__()} items.",
+                            notification_type='order_update'
+                        )
 
                     # Clear cart
                     items.delete()
@@ -139,6 +148,14 @@ def checkout(request, product_id):
                     # Update product stock
                     product.stock -= quantity
                     product.save()
+
+                    # Create notification for vendor
+                    Notification.objects.create(
+                        user=product.vendor,
+                        title="New Order Received",
+                        message=f"You have a new order (# {order.id}) for {quantity}x {product.name}.",
+                        notification_type='order_update'
+                    )
 
                     messages.success(request, f'Order placed successfully! Your order number is #{order.id}')
                     return redirect('order_confirmation', order_id=order.id)
@@ -247,6 +264,14 @@ def approve_order(request, order_id):
             f"Order #{order.id} confirmed! " +
             f"Stock has been updated and customer has been notified."
         )
+
+        # Create notification for customer
+        Notification.objects.create(
+            user=order.customer,
+            title="Order Confirmed",
+            message=f"Your order #{order.id} has been confirmed by the vendor.",
+            notification_type='order_update'
+        )
         
         print(f"=== ORDER APPROVED ===")
         print(f"Order: #{order.id}")
@@ -277,6 +302,14 @@ def cancel_order(request, order_id):
                 item.product.save()
         
         messages.success(request, f"Order #{order.id} has been cancelled.")
+
+        # Create notification for customer
+        Notification.objects.create(
+            user=order.customer,
+            title="Order Cancelled",
+            message=f"Your order #{order.id} has been cancelled by the vendor.",
+            notification_type='order_update'
+        )
     else:
         messages.error(request, "This order cannot be cancelled.")
     

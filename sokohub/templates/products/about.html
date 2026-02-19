@@ -3,31 +3,184 @@
 {% block title %}About Us - Soko Hub{% endblock %}
 
 {% block content %}
-<div class="row py-5">
-    <div class="col-md-8 mx-auto">
-        <h1 class="fw-bold mb-4">About Soko Hub</h1>
-        <p class="lead">Welcome to Soko Hub, Rwanda's premier online marketplace. We connect verified vendors with
-            customers looking for quality products at the best deals.</p>
-
-        <div class="mt-5">
-            <h3 class="fw-bold">Our Mission</h3>
-            <p>Our mission is to empower local businesses in Rwanda by providing them with a robust platform to reach
-                more customers and grow their sales. We strive to provide a seamless and secure shopping experience for
-                everyone.</p>
-        </div>
-
-        <div class="mt-4">
-            <h3 class="fw-bold">Why Choose Us?</h3>
-            <ul>
-                <li><strong>Verified Vendors:</strong> We ensure all our sellers are trusted and provide genuine
-                    products.</li>
-                <li><strong>Secure Payments:</strong> Your transactions are protected with industry-standard security.
-                </li>
-                <li><strong>Fast Delivery:</strong> Enjoy quick shipping across Kigali and other parts of Rwanda.</li>
-                <li><strong>Great Support:</strong> Our team is always here to help you with any questions or issues.
-                </li>
-            </ul>
+<!-- Hero Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="p-5 bg-primary text-white rounded-4 shadow-sm hero-section text-center">
+            <h1 class="display-4 fw-bold mb-3">About SokoHub</h1>
+            <p class="lead mb-0 mx-auto" style="max-width: 700px;">
+                Your trusted partner for online shopping in Rwanda. We're dedicated to bringing you the best products
+                with unrivaled service.
+            </p>
         </div>
     </div>
 </div>
+
+<!-- Main About Content with Image -->
+<div class="row align-items-center mb-5 py-4">
+    <div class="col-md-6 mb-4 mb-md-0">
+        <h2 class="fw-bold mb-4">Our Mission</h2>
+        <p class="fs-5 text-muted mb-4">
+            To provide Rwandans with easy access to quality products at competitive prices with exceptional service.
+        </p>
+        <div class="d-flex flex-column gap-4">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-heart text-primary fs-4"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="fw-bold mb-1">Customer First</h5>
+                    <p class="text-muted mb-0">Your satisfaction is our priority. We go the extra mile to ensure you
+                        have the best shopping experience.</p>
+                </div>
+            </div>
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-shipping-fast text-primary fs-4"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="fw-bold mb-1">Fast Delivery</h5>
+                    <p class="text-muted mb-0">Same-day delivery in Kigali and fast shipping across Rwanda. We value
+                        your time.</p>
+                </div>
+            </div>
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-users text-primary fs-4"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="fw-bold mb-1">Trusted Community</h5>
+                    <p class="text-muted mb-0">Join thousands of happy customers who trust SokoHub for their online
+                        shopping needs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 text-center">
+        <div class="position-relative d-inline-block">
+            <img src="https://www.capitalcomex.com.ar/guardado.jpg" alt="About SokoHub"
+                class="img-fluid rounded-4 shadow-lg border border-light p-2 bg-white" style="max-height: 500px;">
+            <div class="position-absolute bottom-0 end-0 p-3 bg-white rounded-circle shadow-sm m-3">
+                <i class="fas fa-check-circle text-success fs-3"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="row py-5 bg-light rounded-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Frequently Asked Questions</h2>
+            <p class="text-muted">Quick answers to common inquiries about shopping with us</p>
+        </div>
+
+        <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden bg-white" id="faqAccordion">
+            <!-- FAQ 1 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button fw-bold py-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#faq-1">
+                        How long does delivery take?
+                    </button>
+                </h2>
+                <div id="faq-1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">
+                        We offer same-day delivery within Kigali and 24-48 hour shipping across the rest of Rwanda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#faq-2">
+                        What payment methods do you accept?
+                    </button>
+                </h2>
+                <div id="faq-2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">
+                        We accept MoMo (MTN Mobile Money), major credit cards, and bank transfers through our secure
+                        payment gateway.
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#faq-3">
+                        How can I track my order?
+                    </button>
+                </h2>
+                <div id="faq-3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">
+                        Once your order is processed, you'll receive a tracking number via SMS and email to monitor your
+                        delivery.
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#faq-4">
+                        Do you offer returns?
+                    </button>
+                </h2>
+                <div id="faq-4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">
+                        Yes, we have a hassle-free 7-day return policy for items that are damaged or significantly
+                        different from the description.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="row mt-5 mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white border-0 py-5 text-center rounded-4 shadow-sm">
+            <div class="card-body">
+                <h3 class="fw-bold mb-3">Experience the Best of SokoHub</h3>
+                <p class="mb-4 text-white-50">Discover quality products and unbeatable deals today.</p>
+                <a href="{% url 'product_list' %}" class="btn btn-light btn-lg px-5 fw-bold text-primary">
+                    <i class="fas fa-shopping-cart me-2"></i>Start Shopping Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #00428d 100%);
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa;
+        color: #0d6efd;
+    }
+
+    .hover-lift {
+        transition: transform 0.2s;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+    }
+
+    .img-fluid {
+        transition: transform 0.3s;
+    }
+
+    .img-fluid:hover {
+        transform: scale(1.02);
+    }
+</style>
 {% endblock %}
