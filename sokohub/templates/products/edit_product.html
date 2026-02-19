@@ -15,10 +15,16 @@
                     {% csrf_token %}
 
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             {{ form.name|as_crispy_field }}
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                            {{ form.category|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
                             {{ form.status|as_crispy_field }}
                         </div>
                     </div>
@@ -36,12 +42,32 @@
 
                     {{ form.image|as_crispy_field }}
 
+                    <div class="mb-3">
+                        <label for="id_images" class="form-label">Add More Gallery Images</label>
+                        <input type="file" name="images" id="id_images" class="form-control" accept="image/*" multiple>
+                        <small class="text-muted">Select multiple images to add to the product gallery.</small>
+                    </div>
+
+                    {% if product.images.all %}
+                    <div class="mb-3">
+                        <label class="form-label">Current Gallery Images:</label>
+                        <div class="row g-2">
+                            {% for img in product.images.all %}
+                            <div class="col-3">
+                                <img src="{{ img.image.url }}" class="img-thumbnail"
+                                    style="height: 100px; object-fit: cover;">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
                     {% if product.image %}
                     <div class="mb-3">
                         <label class="form-label">Current Image:</label>
                         <div>
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                                 class="img-thumbnail" style="max-height: 200px;">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-thumbnail"
+                                style="max-height: 200px;">
                         </div>
                     </div>
                     {% endif %}

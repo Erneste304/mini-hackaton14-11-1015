@@ -1,75 +1,170 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Soko Hub - Best Deals in Rwanda{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<div class="hero-section bg-primary text-white py-5 mb-5 rounded">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bold mb-3">Welcome to Soko Hub created by Erneste304Tech</h1>
-        <p class="lead mb-4">Your trusted online marketplace for quality products</p>
-        <a href="{% url 'product_list' %}" class="btn btn-light btn-lg">
-            Start Shopping Now
+<div class="p-5 mb-4 bg-primary text-white rounded-3 shadow-sm hero-section">
+    <div class="container-fluid py-5">
+        <h1 class="display-4 fw-bold">Shop the Best Deals</h1>
+        <p class="col-md-8 fs-4">Discover thousands of quality products from verified vendors across Rwanda. Join Soko
+            Hub today!</p>
+        <a href="{% url 'product_list' %}" class="btn btn-light btn-lg px-4 fw-bold text-primary">
+            <i class="fas fa-shopping-bag me-2"></i>Start Shopping
         </a>
     </div>
 </div>
 
-<!-- Featured Products -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h2 class="mb-4">Featured Products</h2>
+<!-- Features Section (sokohub.shop style) -->
+<div class="row g-4 py-5 border-bottom">
+    <div class="col-md-3 d-flex align-items-center">
+        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+            <i class="fas fa-truck"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-0">Free Delivery</h6>
+            <small class="text-muted">On orders over KSh 5,000</small>
+        </div>
+    </div>
+    <div class="col-md-3 d-flex align-items-center">
+        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-0">Secure Payment</h6>
+            <small class="text-muted">M-Pesa & Card accepted</small>
+        </div>
+    </div>
+    <div class="col-md-3 d-flex align-items-center">
+        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-0">Fast Shipping</h6>
+            <small class="text-muted">Same day delivery in Kigali</small>
+        </div>
+    </div>
+    <div class="col-md-3 d-flex align-items-center">
+        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-0">Quality Products</h6>
+            <small class="text-muted">Verified vendors only</small>
+        </div>
     </div>
 </div>
 
-{% if featured_products %}
-<div class="row">
-    {% for product in featured_products %}
-    <div class="col-md-3 col-sm-6 mb-4">
-        <div class="card product-card h-100">
-            <div class="card-img-top-container" style="height: 200px; overflow: hidden;">
-                {% if product.image %}
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 100%; object-fit: cover;">
-                {% else %}
-                <div class="bg-light d-flex align-items-center justify-content-center h-100">
-                    <span class="text-muted">No Image</span>
-                </div>
-                {% endif %}
-            </div>
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title">{{ product.name|truncatewords:4 }}</h5>
-                <p class="card-text text-muted small mb-2">
-                    by {{ product.vendor.username }}
-                </p>
-                <div class="mt-auto">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <strong class="text-primary">${{ product.price }}</strong>
-                        <span class="badge {% if product.is_in_stock %}bg-success{% else %}bg-danger{% endif %}">
-                            {% if product.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}
-                        </span>
+<!-- Shop by Category Section -->
+<div class="py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Shop by Category</h2>
+            <p class="text-muted">Browse our wide selection across multiple categories</p>
+        </div>
+    </div>
+    <div class="row g-4">
+        {% for category in categories %}
+        <div class="col-6 col-md-3">
+            <a href="{% url 'product_list_by_category' category.slug %}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm category-card text-center p-4">
+                    <div class="display-5 mb-2 text-primary">
+                        {% if category.icon %}
+                        <i class="{{ category.icon }}"></i>
+                        {% else %}
+                        📦
+                        {% endif %}
                     </div>
-                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary w-100">
-                        View Details
-                    </a>
+                    <h5 class="fw-bold text-dark mb-0">{{ category.name }}</h5>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if trending_products %}
+<!-- Trending Products Section -->
+<div class="py-5 bg-light rounded-4 px-4 my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Trending Products</h2>
+            <p class="text-muted">Check out our most popular items this week</p>
+        </div>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        {% for product in trending_products %}
+        <div class="col">
+            <div class="card h-100 product-card border-0 shadow-sm">
+                <div class="position-relative">
+                    {% if product.get_image_display %}
+                    <img src="{{ product.get_image_display }}" class="card-img-top p-3" alt="{{ product.name }}"
+                        style="height: 200px; object-fit: contain;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <span class="position-absolute top-0 start-0 m-3 badge bg-danger">Trending</span>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title fw-bold mb-1">{{ product.name }}</h6>
+                    <p class="text-primary fw-bold mb-0">{{ product.get_display_price }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 pb-3">
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-primary btn-sm w-100">View
+                        Details</a>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
-
-<div class="text-center mt-4">
-    <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg">
-        View All Products
-    </a>
-</div>
-
-{% else %}
-<div class="text-center py-5">
-    <div class="mb-4">
-        <i class="fas fa-box-open fa-3x text-muted"></i>
-    </div>
-    <h4 class="text-muted">No Products Available</h4>
-    <p class="text-muted">Check back later for new products.</p>
 </div>
 {% endif %}
+
+<!-- New Arrivals (Recent Products) -->
+<div class="py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">New Arrivals</h2>
+        <a href="{% url 'product_list' %}" class="btn btn-link">View All</a>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        {% for product in featured_products %}
+        <div class="col">
+            <div class="card h-100 product-card border-0 shadow-sm">
+                {% if product.get_image_display %}
+                <img src="{{ product.get_image_display }}" class="card-img-top p-3" alt="{{ product.name }}"
+                    style="height: 200px; object-fit: contain;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h6 class="card-title fw-bold mb-1">{{ product.name }}</h6>
+                    <p class="small text-muted mb-2">{{ product.category.name|default:"General" }}</p>
+                    <p class="text-primary fw-bold mb-0">{{ product.get_display_price }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 pb-3">
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-primary btn-sm w-100">View
+                        Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .category-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    }
+</style>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block title %}Shopping Cart - Soko Hub{% endblock %}
 
@@ -37,8 +37,7 @@
                                 {% csrf_token %}
                                 <select name="quantity" class="form-select" onchange="this.form.submit()">
                                     {% for i in "123456789"|make_list %}
-                                        <option value="{{ forloop.counter }}" 
-                                                {% if forloop.counter == item.quantity %}selected{% endif %}>
+                                        <option value="{{ forloop.counter }}" {% if forloop.counter == item.quantity %}selected{% endif %}>
                                             {{ forloop.counter }}
                                         </option>
                                     {% endfor %}

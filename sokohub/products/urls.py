@@ -5,7 +5,10 @@ urlpatterns = [
     # Public routes
     path('', views.home, name='home'),
     path('products/', views.product_list, name='product_list'),
+    path('products/category/<slug:category_slug>/', views.product_list, name='product_list_by_category'),
     path('products/<int:product_id>/', views.product_detail, name='product_detail'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
 
     # Vendor routes
     path('vendor/dashboard/', views.vendor_dashboard, name='vendor_dashboard'),

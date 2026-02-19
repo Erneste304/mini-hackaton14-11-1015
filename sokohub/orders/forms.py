@@ -23,6 +23,7 @@ class CheckoutForm(forms.Form):
     quantity = forms.IntegerField(
         min_value=1,
         initial=1,
+        required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'min': '1'
@@ -45,6 +46,6 @@ class CheckoutForm(forms.Form):
 
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
-        if quantity < 1:
+        if quantity is not None and quantity < 1:
             raise forms.ValidationError("Quantity must be at least 1.")
         return quantity

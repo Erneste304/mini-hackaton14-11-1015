@@ -17,61 +17,65 @@
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-light">
-                    <tr>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                                     class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                                {% else %}
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3"
-                                     style="width: 50px; height: 50px;">
-                                    <i class="fas fa-box text-muted"></i>
+                        {% for product in products %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if product.image %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="rounded me-3"
+                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-light rounded d-flex align-items-center justify-content-center me-3"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="fas fa-box text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-1">{{ product.name }}</h6>
+                                        <small class="text-muted">
+                                            {{ product.description|truncatewords:8|default:"No description" }}
+                                        </small>
+                                    </div>
                                 </div>
-                                {% endif %}
-                                <div>
-                                    <h6 class="mb-1">{{ product.name }}</h6>
-                                    <small class="text-muted">
-                                        {{ product.description|truncatewords:8|default:"No description" }}
-                                    </small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${{ product.price }}</td>
-                        <td>
-                                <span class="{% if product.stock == 0 %}text-danger fw-bold{% elif product.stock < 10 %}text-warning{% else %}text-success{% endif %}">
+                            </td>
+                            <td>${{ product.price }}</td>
+                            <td>
+                                <span
+                                    class="{% if product.stock == 0 %}text-danger fw-bold{% elif product.stock < 10 %}text-warning{% else %}text-success{% endif %}">
                                     {{ product.stock }}
                                 </span>
-                        </td>
-                        <td>
-                                <span class="badge {% if product.status == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+                            </td>
+                            <td>
+                                <span
+                                    class="badge {% if product.status == 'active' %}bg-success{% elif product.status == 'out_of_stock' %}bg-danger{% else %}bg-secondary{% endif %}">
                                     {{ product.get_status_display }}
                                 </span>
-                        </td>
-                        <td>{{ product.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a href="{% url 'edit_product' product.id %}" class="btn btn-outline-primary" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-info" title="View" target="_blank">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                            </td>
+                            <td>{{ product.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'edit_product' product.id %}" class="btn btn-outline-primary"
+                                        title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-info"
+                                        title="View" target="_blank">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

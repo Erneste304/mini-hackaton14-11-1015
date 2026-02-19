@@ -7,94 +7,83 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Vendor Orders</h2>
         <div class="badge bg-primary fs-6">
-            Total Orders: {{ order_items.count }}
+            Total Orders: {{ orders.count }}
         </div>
     </div>
 
-    {% if order_items %}
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
+    {% if orders %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0 d-flex align-items-center">
                 <i class="fas fa-shopping-bag me-2"></i>
                 Order Management
                 {% if pending_count > 0 %}
-                <span class="badge bg-warning ms-2">{{ pending_count }} Pending</span>
+                <span class="badge bg-warning text-dark ms-2">{{ pending_count }} Pending</span>
                 {% endif %}
             </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Order ID</th>
-                            <th>Product</th>
+                            <th class="ps-3">Order info</th>
+                            <th>Products</th>
                             <th>Customer</th>
-                            <th>Qty</th>
-                            <th>Price</th>
                             <th>Total</th>
                             <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
+                            <th class="text-end pe-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in order_items %}
+                        {% for order in orders %}
                         <tr>
-                            <td>
-                                <strong>#{{ item.order.id }}</strong>
-                                <br>
-                                <small class="text-muted">{{ item.order.created_at|date:"M d, H:i" }}</small>
+                            <td class="ps-3">
+                                <span class="fw-bold text-primary">#{{ order.id }}</span>
+                                <div class="small text-muted">{{ order.created_at|date:"M d, Y" }}</div>
                             </td>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
-                                             class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                    {% endif %}
-                                    <div>
-                                        <strong>{{ item.product.name }}</strong>
-                                        <br>
-                                        <small class="text-muted">Stock: {{ item.product.stock }}</small>
+                                <div class="d-flex flex-column gap-1">
+                                    {% for item in order.items.all %}
+                                    <div class="d-flex align-items-center small">
+                                        {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                            class="rounded me-1" style="width: 24px; height: 24px; object-fit: cover;">
+                                        {% endif %}
+                                        <span>{{ item.quantity }}x {{ item.product.name }}</span>
                                     </div>
+                                    {% endfor %}
                                 </div>
                             </td>
                             <td>
-                                {{ item.order.customer.username }}
-                                <br>
-                                <small class="text-muted">{{ item.order.phone }}</small>
+                                <div class="fw-bold">{{ order.customer.username }}</div>
+                                <div class="small text-muted">{{ order.phone }}</div>
                             </td>
-                            <td>{{ item.quantity }}</td>
-                            <td>${{ item.price }}</td>
-                            <td><strong>${{ item.get_subtotal }}</strong></td>
+                            <td><strong class="text-dark">${{ order.total }}</strong></td>
                             <td>
-                                <span class="badge bg-{{ item.order.get_status_color }}">
-                                    {{ item.order.get_status_display }}
+                                <span class="badge bg-{{ order.get_status_color }} py-2 px-3">
+                                    {{ order.get_status_display }}
                                 </span>
                             </td>
-                            <td>{{ item.order.created_at|date:"M d, Y" }}</td>
-                            <td>
-                                {% if item.order.status == 'pending' %}
-                                <div class="btn-group btn-group-sm">
-                                    <a href="{% url 'approve_order' item.order.id %}" 
-                                       class="btn btn-success" 
-                                       title="Approve Order"
-                                       onclick="return confirm('Approve this order? Stock will be deducted.')">
-                                        <i class="fas fa-check"></i> Approve
+                            <td class="text-end pe-3">
+                                {% if order.status == 'pending' %}
+                                <div class="btn-group">
+                                    <a href="{% url 'approve_order' order.id %}"
+                                        class="btn btn-sm btn-success d-flex align-items-center"
+                                        onclick="return confirm('Approve this order? Stock will be deducted.')">
+                                        <i class="fas fa-check me-1"></i> Approve
                                     </a>
-                                    <a href="{% url 'cancel_order' item.order.id %}" 
-                                       class="btn btn-danger" 
-                                       title="Cancel Order"
-                                       onclick="return confirm('Cancel this order?')">
+                                    <a href="{% url 'cancel_order' order.id %}" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Cancel this order?')">
                                         <i class="fas fa-times"></i>
                                     </a>
                                 </div>
-                                {% elif item.order.status == 'confirmed' %}
-                                <button class="btn btn-info btn-sm" disabled>
-                                    <i class="fas fa-check-circle"></i> Approved
-                                </button>
+                                {% elif order.status == 'confirmed' %}
+                                <span class="badge bg-light text-success border border-success px-3">
+                                    <i class="fas fa-check-double me-1"></i> Confirmed
+                                </span>
                                 {% else %}
-                                <span class="text-muted">No actions</span>
+                                <span class="text-muted small">No actions</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -106,26 +95,33 @@
     </div>
     {% else %}
     <div class="text-center py-5">
-        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
-        <h4 class="text-muted">No Orders Yet</h4>
-        <p class="text-muted mb-3">You haven't received any orders for your products.</p>
-        
-        <div class="alert alert-info">
-            <h6>When customers order your products:</h6>
-            <ul class="text-start mb-0">
-                <li>You'll see a notification badge 🔔</li>
-                <li>Orders will appear here with "Pending" status</li>
-                <li>You can Approve or Cancel each order</li>
-                <li>Stock is automatically updated when you approve</li>
-            </ul>
+        <div class="mb-4">
+            <i class="fas fa-shopping-bag fa-4x text-light-emphasis"></i>
         </div>
-        
-        <a href="{% url 'vendor_products' %}" class="btn btn-primary me-2">
-            Manage Products
-        </a>
-        <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
-            Browse Marketplace
-        </a>
+        <h4 class="text-dark">No Orders Yet</h4>
+        <p class="text-muted mb-4 max-w-md mx-auto">Customers haven't purchased your products yet. Keep your inventory
+            fresh and prices competitive to attract more buyers!</p>
+
+        <div class="card bg-light border-0 max-w-md mx-auto mb-4 text-start">
+            <div class="card-body p-4">
+                <h6 class="fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>How it works:</h6>
+                <ul class="mb-0 small text-muted lh-lg">
+                    <li>Get real-time notifications for new sales</li>
+                    <li>Each order portion is independent and only visible to you</li>
+                    <li>Accepting an order automatically updates your stock</li>
+                    <li>Customers get notified immediately when you ship</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2">
+            <a href="{% url 'vendor_products' %}" class="btn btn-primary">
+                View My Products
+            </a>
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
+                Explore Marketplace
+            </a>
+        </div>
     </div>
     {% endif %}
 </div>

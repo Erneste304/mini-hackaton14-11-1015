@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'sokohub.context_processors.vendor_notifications',
+                'sokohub.context_processors.cart_count',
                 
             ],
         },
@@ -144,3 +145,20 @@ LOGIN_URL = 'login'  # Login page URL
 #media file configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ─── Email Configuration ───────────────────────────────────────────────────────
+# ⚠️  DEVELOPMENT MODE: Emails will print to your terminal (console).
+# To send real emails, comment out the ConsoleBackend line and uncomment the SMTP block.
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your-gmail@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your-16-char-app-password'
+# DEFAULT_FROM_EMAIL = 'Soko Hub <your-gmail@gmail.com>'
+
+# OTP settings
+OTP_EXPIRY_MINUTES = 10

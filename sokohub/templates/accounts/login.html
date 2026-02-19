@@ -1,62 +1,137 @@
 ﻿{% extends 'base.html' %}
-{% load crispy_forms_tags %}
 
-{% block title %}Login - Soko Hub{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Welcome Back</h4>
-                <p class="mb-0 small">Sign in to your Soko Hub account</p>
+<div class="row g-0 justify-content-center py-3">
+
+    <!-- Left Info Panel -->
+    <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-center p-5"
+        style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 16px 0 0 16px; color:#fff; min-height:500px;">
+        <div>
+            <div class="mb-4" style="font-size:3rem;">🛒</div>
+            <h2 class="fw-bold mb-2">Welcome Back!</h2>
+            <p class="mb-4 opacity-75" style="line-height:1.7;">
+                Your trusted marketplace is waiting. Sign in to continue shopping, manage orders, or run your store.
+            </p>
+
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:1.3rem;">📦</span>
+                    <span class="opacity-85">Track your orders in real time</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:1.3rem;">🏪</span>
+                    <span class="opacity-85">Manage your products &amp; sales</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:1.3rem;">💬</span>
+                    <span class="opacity-85">Get instant order notifications</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span style="font-size:1.3rem;">🔒</span>
+                    <span class="opacity-85">Your account is secure &amp; verified</span>
+                </div>
             </div>
-            <div class="card-body">
+        </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-lg border-0 h-100" style="border-radius: 0 16px 16px 0;">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4 px-lg-5">
+                <h4 class="fw-bold text-primary mb-0">Sign In</h4>
+                <p class="text-muted small mb-0">Enter your credentials to access your account</p>
+            </div>
+
+            <div class="card-body px-4 px-lg-5 py-4">
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show py-2" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
                 <form method="post">
                     {% csrf_token %}
 
                     {% if form.errors %}
-                    <div class="alert alert-danger">
-                        Please enter a correct username and password. Note that both fields may be case-sensitive.
+                    <div class="alert alert-danger py-2" style="font-size:14px;">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        Incorrect username or password. Please try again.
                     </div>
                     {% endif %}
 
                     <div class="mb-3">
-                        <label for="id_username" class="form-label">Username or Email</label>
-                        <input type="text" name="username" class="form-control" id="id_username"
-                               placeholder="Enter your username or email" required>
+                        <label for="id_username" class="form-label fw-semibold">Username or Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-user text-muted"></i>
+                            </span>
+                            <input type="text" name="username" id="id_username" class="form-control border-start-0 ps-0"
+                                placeholder="Enter your username or email" style="border-radius: 0 8px 8px 0;"
+                                required />
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="id_password" class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" id="id_password"
-                               placeholder="Enter your password" required>
+                        <label for="id_password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-lock text-muted"></i>
+                            </span>
+                            <input type="password" name="password" id="id_password"
+                                class="form-control border-start-0 ps-0" placeholder="Enter your password"
+                                style="border-radius: 0 8px 8px 0;" required />
+                            <button class="btn btn-outline-secondary border-start-0" type="button" id="toggle-password"
+                                style="border-radius: 0 8px 8px 0;">
+                                <i class="fas fa-eye" id="eye-icon"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
-                        <label class="form-check-label" for="remember_me">Remember me</label>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me" />
+                            <label class="form-check-label small" for="remember_me">Remember me</label>
+                        </div>
+                        <a href="#" class="small text-primary">Forgot password?</a>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                        Sign In
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3"
+                        style="border-radius:10px; letter-spacing:.5px;">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
                     </button>
-
-                    <div class="text-center">
-                        <a href="#" class="text-muted small">Forgot your password?</a>
-                    </div>
                 </form>
 
-                <hr class="my-4">
+                <hr class="my-3" />
 
                 <div class="text-center">
-                    <p class="mb-0">Don't have an account?</p>
-                    <a href="{% url 'register' %}" class="btn btn-outline-primary mt-2">
-                        Create New Account
-                    </a>
+                    <span class="text-muted small">Don't have an account yet?</span>
+                    <a href="{% url 'register' %}" class="fw-bold ms-1">Create one free</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Password show/hide toggle
+    document.getElementById('toggle-password').addEventListener('click', () => {
+        const pw = document.getElementById('id_password');
+        const icon = document.getElementById('eye-icon');
+        if (pw.type === 'password') {
+            pw.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            pw.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+</script>
 {% endblock %}

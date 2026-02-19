@@ -5,29 +5,18 @@ from . import views
 urlpatterns = [
     # Authentication routes
     path('register/', views.register, name='register'),
-    
 
-    # Profile routes
-    #path('profile/', views.profile, name='profile'),
-    #path('profile/vendor/', views.vendor_profile, name='vendor_profile'),
-    #path('profile/customer/', views.customer_profile, name='customer_profile'),
 
-    # Django built-in auth views (with custom templates)
-    path('login/', auth_views.LoginView.as_view(
-        template_name='accounts/login.html',
-        redirect_authenticated_user=True
-    ), name='login'),
+    # Custom login (handles unverified users)
+    path('login/', views.login_view, name='login'),
 
     path('logout/', auth_views.LogoutView.as_view(
         template_name='accounts/logout.html'
     ), name='logout'),
 
-
-    # Use this for actual profile page
+    # Profile routes
     path('profile/', views.profile, name='profile'),
 
-    #notification path
+    # Notification path
     path('notifications/', views.all_notifications, name='all_notifications'),
 ]
-
-path('debug/', views.debug_profile_pic, name='debug_pic'),

@@ -1,57 +1,92 @@
 ﻿{% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}Add New Product - Soko Hub{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Add New Product</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                <h4 class="mb-0 fw-bold">Add New Product</h4>
+                <p class="mb-0 small opacity-75">List your item in the marketplace</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-                        <div class="mb-3">
-                            <label class="form-label">Product Name *</label>
-                            <input type="text" name="name" class="form-control"
-                                   placeholder="Enter product name" required>
-                        </div>
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label fw-bold small text-uppercase text-muted">Product
+                            Name*</label>
+                        <input type="text" name="name" id="id_name" class="form-control form-control-lg border-2"
+                            placeholder="e.g. iPhone 15 Pro" required>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="4"
-                                      placeholder="Describe your product..."></textarea>
-                        </div>
+                    <div class="mb-3">
+                        <label for="id_category"
+                            class="form-label fw-bold small text-uppercase text-muted">Category</label>
+                        <select name="category" id="id_category" class="form-select form-select-lg border-2">
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Price (RWF) *</label>
-                                <input type="number" name="price" class="form-control"
-                                       step="0.01" min="0.01" placeholder="0.00" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Stock Quantity *</label>
-                                <input type="number" name="stock" class="form-control"
-                                       min="0" placeholder="0" required>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label for="id_status" class="form-label fw-bold small text-uppercase text-muted">Stock
+                            Status</label>
+                        <select name="status" id="id_status" class="form-select form-select-lg border-2">
+                            <option value="active" selected>Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="out_of_stock">Out of Stock</option>
+                        </select>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Product Image (Optional)</label>
-                            <input type="file" name="image" class="form-control"
-                                   accept="image/*">
-                            <div class="form-text">You can add images later when editing.</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label for="id_price" class="form-label fw-bold small text-uppercase text-muted">Price
+                                ($)*</label>
+                            <input type="number" step="0.01" name="price" id="id_price"
+                                class="form-control form-control-lg border-2" placeholder="0.00" required>
                         </div>
+                        <div class="col-6">
+                            <label for="id_stock" class="form-label fw-bold small text-uppercase text-muted">In
+                                Stock*</label>
+                            <input type="number" name="stock" id="id_stock"
+                                class="form-control form-control-lg border-2" placeholder="Qty" required>
+                        </div>
+                    </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'vendor_products' %}" class="btn btn-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Add Product</button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="mb-4">
+                        <label for="id_image" class="form-label fw-bold small text-uppercase text-muted">Primary
+                            Image</label>
+                        <input type="file" name="image" id="id_image" class="form-control form-control-lg border-2"
+                            accept="image/*">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_images" class="form-label fw-bold small text-uppercase text-muted">Additional
+                            Gallery Images</label>
+                        <input type="file" name="images" id="id_images" class="form-control form-control-lg border-2"
+                            accept="image/*" multiple>
+                        <small class="text-muted">You can select multiple images for the gallery.</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_description"
+                            class="form-label fw-bold small text-uppercase text-muted">Description</label>
+                        <textarea name="description" id="id_description" rows="4" class="form-control border-2"
+                            placeholder="Tell buyers about your product..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold py-3 shadow-sm rounded-3">
+                            <i class="fas fa-plus-circle me-2"></i>Publish Product
+                        </button>
+                        <a href="{% url 'vendor_products' %}" class="btn btn-light btn-lg text-muted">Cancel</a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

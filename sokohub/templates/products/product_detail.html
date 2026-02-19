@@ -19,14 +19,27 @@
             <div class="card">
                 <div class="card-body text-center">
                     {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                         class="img-fluid rounded" style="max-height: 400px;">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow-sm mb-3"
+                        style="max-height: 400px; width: 100%; object-fit: contain;">
                     {% else %}
                     <div class="bg-light rounded d-flex align-items-center justify-content-center"
-                         style="height: 300px;">
+                        style="height: 300px;">
                         <i class="fas fa-box fa-3x text-muted"></i>
                     </div>
                     <p class="text-muted mt-2">No image available</p>
+                    {% endif %}
+
+                    {% if product.images.all %}
+                    <div class="row g-2 mt-2">
+                        {% for img in product.images.all %}
+                        <div class="col-3">
+                            <a href="{{ img.image.url }}" target="_blank">
+                                <img src="{{ img.image.url }}" class="img-thumbnail"
+                                    style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;">
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -65,6 +78,9 @@
                     </div>
 
                     <div class="d-grid gap-2">
+                        <a href="{% url 'add_to_cart' product.id %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                        </a>
                         <a href="{% url 'checkout' product.id %}" class="btn btn-primary btn-lg">
                             <i class="fas fa-shopping-cart me-2"></i>Buy Now
                         </a>
@@ -100,7 +116,7 @@
                         <div class="card-img-top-container" style="height: 200px; overflow: hidden;">
                             {% if related_product.image %}
                             <img src="{{ related_product.image.url }}" class="card-img-top"
-                                 alt="{{ related_product.name }}" style="height: 100%; object-fit: cover;">
+                                alt="{{ related_product.name }}" style="height: 100%; object-fit: cover;">
                             {% else %}
                             <div class="bg-light d-flex align-items-center justify-content-center h-100">
                                 <i class="fas fa-box text-muted"></i>
@@ -111,7 +127,8 @@
                             <h5 class="card-title">{{ related_product.name|truncatewords:4 }}</h5>
                             <p class="card-text text-primary fw-bold">${{ related_product.price }}</p>
                             <div class="mt-auto">
-                                <a href="{% url 'product_detail' related_product.id %}" class="btn btn-outline-primary w-100">
+                                <a href="{% url 'product_detail' related_product.id %}"
+                                    class="btn btn-outline-primary w-100">
                                     View Details
                                 </a>
                             </div>

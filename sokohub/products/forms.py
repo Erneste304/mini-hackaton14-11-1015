@@ -4,14 +4,15 @@ from .models import Product
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'stock', 'image', 'image_url', 'status']
+        fields = ['name', 'category', 'description', 'price', 'stock', 'image', 'image_url', 'status']
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Product Name'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={
                 'rows': 4,
                 'placeholder': 'Enter detailed product description...',
                 'class': 'form-control'
             }),
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),

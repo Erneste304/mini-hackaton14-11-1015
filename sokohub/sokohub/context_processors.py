@@ -1,39 +1,23 @@
+from cart.models import Cart
 from notifications.models import Notification
 
-def user_notifications(request):
-    """Add notification data to all templates"""
-    context = {}
-    
+def cart_count(request):
     if request.user.is_authenticated:
-        # Count unread notifications
-        unread_count = Notification.objects.filter(
-            user=request.user, 
-            is_read=False
-        ).count()
-        
-        # Get recent notifications
-        recent_notifications = Notification.objects.filter(
-            user=request.user
-        ).order_by('-created_at')[:5]
-        
-        context.update({
-            'unread_notifications_count': unread_count,
-            'recent_notifications': recent_notifications,
-        })
-    
-    return context
+        try:
+            cart = Cart.objects.get(customer=request.user)
+            return {'cart_count': cart.items.count()}
+        except Cart.DoesNotExist:
+            return {'cart_count': 0}
+    return {'cart_count': 0}
 
 def vendor_notifications(request):
-    """
-    Context processor for vendor notifications
-    """
-    notifications = []
-    unread_count = 0
-
-    if request.user.is_authenticated and hasattr(request.user, 'vendor_profile'):
-
-        pass
-
+    if request.user.is_authenticated:
+        notifications = Notification.objects.filter(user=request.user)
+        return {
+            'unread_notifications_count': notifications.filter(is_read=False).count(),
+            'recent_notifications': notifications.order_by('-created_at')[:5]
+        }
     return {
-        'vendor_notifications': notifications,
-        'vendor_unread_notifications_count': unread_count,}
+        'unread_notifications_count': 0,
+        'recent_notifications': []
+    }

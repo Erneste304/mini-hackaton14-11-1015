@@ -5,8 +5,92 @@ from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse
 from accounts.decorators import customer_required, vendor_required
 from products.models import Product
+from cart.models import Cart
 from .models import Order, OrderItem
 from .forms import CheckoutForm
+
+@customer_required
+def checkout_cart(request):
+    """
+    Handle checkout for all items in the cart
+    """
+    cart, created = Cart.objects.get_or_create(customer=request.user)
+    items = cart.items.all()
+
+    if not items:
+        messages.error(request, 'Your cart is empty.')
+        return redirect('view_cart')
+
+    if request.method == 'POST':
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Group items by vendor
+                    vendor_items_map = {}
+                    for item in items:
+                        vendor = item.product.vendor
+                        if vendor not in vendor_items_map:
+                            vendor_items_map[vendor] = []
+                        vendor_items_map[vendor].append(item)
+
+                    # Check stock for all items
+                    for item in items:
+                        if item.product.stock < item.quantity:
+                            messages.error(request, f'Sorry, only {item.product.stock} items of {item.product.name} available.')
+                            return redirect('checkout_cart')
+
+                    created_order_ids = []
+                    for vendor, v_items in vendor_items_map.items():
+                        # Calculate vendor subtotal
+                        vendor_total = sum(item.get_total_price() for item in v_items)
+                        
+                        # Create order for this vendor
+                        order = Order.objects.create(
+                            customer=request.user,
+                            vendor=vendor,
+                            total=vendor_total,
+                            delivery_address=form.cleaned_data['delivery_address'],
+                            phone=form.cleaned_data['phone']
+                        )
+                        created_order_ids.append(str(order.id))
+
+                        # Create order items and update stock
+                        for item in v_items:
+                            OrderItem.objects.create(
+                                order=order,
+                                product=item.product,
+                                quantity=item.quantity,
+                                price=item.product.price
+                            )
+                            item.product.stock -= item.quantity
+                            item.product.save()
+
+                    # Clear cart
+                    items.delete()
+
+                    order_str = ", ".join(created_order_ids)
+                    messages.success(request, f'Order(s) placed successfully! Order number(s): #{order_str}')
+                    # Redirect to confirmation with the first order ID (we'll update confirmation to handle context if needed)
+                    return redirect('order_confirmation', order_id=created_order_ids[0])
+
+            except Exception as e:
+                messages.error(request, f'Error placing order: {str(e)}')
+    else:
+        initial_data = {
+            'phone': request.user.phone or '',
+            'delivery_address': request.user.location or '',
+        }
+        form = CheckoutForm(initial=initial_data)
+
+    context = {
+        'cart': cart,
+        'items': items,
+        'form': form,
+        'title': 'Cart Checkout',
+        'is_cart_checkout': True
+    }
+    return render(request, 'orders/checkout.html', context)
 
 @customer_required
 def checkout(request, product_id):
@@ -25,7 +109,7 @@ def checkout(request, product_id):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    quantity = form.cleaned_data['quantity']
+                    quantity = form.cleaned_data.get('quantity') or 1
 
                     # Check stock availability again (prevent race condition)
                     if product.stock < quantity:
@@ -38,6 +122,7 @@ def checkout(request, product_id):
                     # Create order
                     order = Order.objects.create(
                         customer=request.user,
+                        vendor=product.vendor,
                         total=total,
                         delivery_address=form.cleaned_data['delivery_address'],
                         phone=form.cleaned_data['phone']
@@ -73,7 +158,8 @@ def checkout(request, product_id):
     context = {
         'product': product,
         'form': form,
-        'title': 'Checkout'
+        'title': 'Checkout',
+        'is_cart_checkout': False
     }
     return render(request, 'orders/checkout.html', context)
 
@@ -122,21 +208,16 @@ def customer_orders(request):
 @vendor_required
 def vendor_orders(request):
     """Vendor's order management page"""
-    # Get all order items for vendor's products
-    order_items = OrderItem.objects.filter(
-        product__vendor=request.user
-    ).select_related('order', 'product', 'order__customer').order_by('-order__created_at')
+    # Get all orders for this vendor
+    orders = Order.objects.filter(
+        vendor=request.user
+    ).prefetch_related('items', 'items__product').order_by('-created_at')
     
     # Count pending orders for notifications
-    pending_count = order_items.filter(order__status='pending').count()
-    
-    print(f"=== VENDOR ORDERS ===")
-    print(f"Vendor: {request.user.username}")
-    print(f"Total orders: {order_items.count()}")
-    print(f"Pending orders: {pending_count}")
+    pending_count = orders.filter(status='pending').count()
     
     context = {
-        'order_items': order_items,
+        'orders': orders,
         'pending_count': pending_count,
         'title': 'Vendor Orders'
     }
@@ -145,22 +226,17 @@ def vendor_orders(request):
 @vendor_required
 def approve_order(request, order_id):
     """Vendor approves an order"""
-    order = get_object_or_404(Order, id=order_id)
-    vendor_items = order.items.filter(product__vendor=request.user)
-    if not vendor_items.exists():
-        messages.error(request, "You can only approve orders containing your products.")
-        return redirect('vendor_orders')
+    order = get_object_or_404(Order, id=order_id, vendor=request.user)
     
     if order.can_be_confirmed():
         order.status = 'confirmed'
         order.save()
         
-
-        for item in vendor_items:
+        # Update stock for items in this order
+        for item in order.items.all():
             if item.product.stock >= item.quantity:
                 item.product.stock -= item.quantity
                 item.product.save()
-                print(f"Stock updated: {item.product.name} -{item.quantity}")
             else:
                 messages.warning(request, 
                     f"Insufficient stock for {item.product.name}. " +
@@ -187,29 +263,20 @@ def approve_order(request, order_id):
 @vendor_required
 def cancel_order(request, order_id):
     """Vendor cancels an order"""
-    order = get_object_or_404(Order, id=order_id)
-    
-    vendor_items = order.items.filter(product__vendor=request.user)
-    if not vendor_items.exists():
-        messages.error(request, "You can only cancel orders containing your products.")
-        return redirect('vendor_orders')
+    order = get_object_or_404(Order, id=order_id, vendor=request.user)
     
     if order.can_be_cancelled():
+        old_status = order.status
         order.status = 'cancelled'
         order.save()
         
         # If order was confirmed, restore stock
-        if order.status == 'confirmed':
-            for item in vendor_items:
+        if old_status == 'confirmed':
+            for item in order.items.all():
                 item.product.stock += item.quantity
                 item.product.save()
         
         messages.success(request, f"Order #{order.id} has been cancelled.")
-        
-        print(f"=== ORDER CANCELLED ===")
-        print(f"Order: #{order.id}")
-        print(f"Vendor: {request.user.username}")
-        
     else:
         messages.error(request, "This order cannot be cancelled.")
     

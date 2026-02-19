@@ -1,5 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
+import random
+import string
+
 
 class User(AbstractUser):
     USER_TYPE_CHOICES = (
@@ -7,11 +11,10 @@ class User(AbstractUser):
         ('customer', 'Customer'),
     )
 
-    user_type = models.CharField(max_length=20,choices=USER_TYPE_CHOICES,default='customer')
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='customer')
     phone = models.CharField(max_length=15, blank=True)
     location = models.CharField(max_length=255, blank=True)
-    
-    
+
     # Enhanced profile fields
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     address = models.TextField(blank=True, help_text="Full delivery address")
@@ -19,7 +22,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100, blank=True, default='Rwanda')
 
-        # Notification preferences
+    # Notification preferences
     email_notifications = models.BooleanField(default=True)
     sms_notifications = models.BooleanField(default=False)
 
@@ -37,11 +40,9 @@ class User(AbstractUser):
 
     def is_customer(self):
         return self.user_type == 'customer'
-    
+
     def get_full_address(self):
         parts = [self.address, self.city, self.country]
         return ', '.join(filter(None, parts))
-    
-
 
 
