@@ -52,7 +52,8 @@ def checkout_cart(request):
                             vendor=vendor,
                             total=vendor_total,
                             delivery_address=form.cleaned_data['delivery_address'],
-                            phone=form.cleaned_data['phone']
+                            phone=form.cleaned_data['phone'],
+                            payment_method=form.cleaned_data['payment_method']
                         )
                         created_order_ids.append(str(order.id))
 
@@ -72,7 +73,8 @@ def checkout_cart(request):
                             user=vendor,
                             title="New Order Received",
                             message=f"You have a new order (# {order.id}) for {v_items.__len__()} items.",
-                            notification_type='order_update'
+                            notification_type='order_update',
+                            target_url=f"/orders/vendor/orders/transaction/{order.id}/"
                         )
 
                     # Clear cart
@@ -134,7 +136,8 @@ def checkout(request, product_id):
                         vendor=product.vendor,
                         total=total,
                         delivery_address=form.cleaned_data['delivery_address'],
-                        phone=form.cleaned_data['phone']
+                        phone=form.cleaned_data['phone'],
+                        payment_method=form.cleaned_data['payment_method']
                     )
 
                     # Create order item
@@ -154,7 +157,8 @@ def checkout(request, product_id):
                         user=product.vendor,
                         title="New Order Received",
                         message=f"You have a new order (# {order.id}) for {quantity}x {product.name}.",
-                        notification_type='order_update'
+                        notification_type='order_update',
+                        target_url=f"/orders/vendor/orders/transaction/{order.id}/"
                     )
 
                     messages.success(request, f'Order placed successfully! Your order number is #{order.id}')
@@ -246,30 +250,23 @@ def approve_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, vendor=request.user)
     
     if order.can_be_confirmed():
-        order.status = 'confirmed'
+        order.status = 'approved'
         order.save()
         
-        # Update stock for items in this order
-        for item in order.items.all():
-            if item.product.stock >= item.quantity:
-                item.product.stock -= item.quantity
-                item.product.save()
-            else:
-                messages.warning(request, 
-                    f"Insufficient stock for {item.product.name}. " +
-                    "Please update your inventory."
-                )
+        # Note: Stock was already reduced during checkout in the original code, 
+        # but let's ensure it's handled consistently. 
+        # Actually, the original code reduces stock during order creation (checkout views).
         
         messages.success(request, 
-            f"Order #{order.id} confirmed! " +
-            f"Stock has been updated and customer has been notified."
+            f"Order #{order.id} approved! " +
+            f"Customer has been notified."
         )
 
         # Create notification for customer
         Notification.objects.create(
             user=order.customer,
-            title="Order Confirmed",
-            message=f"Your order #{order.id} has been confirmed by the vendor.",
+            title="Order Approved",
+            message=f"Your order #{order.id} has been approved by the vendor.",
             notification_type='order_update'
         )
         
@@ -279,9 +276,9 @@ def approve_order(request, order_id):
         print(f"Customer: {order.customer.username}")
         
     else:
-        messages.error(request, "This order cannot be confirmed.")
+        messages.error(request, "This order cannot be approved. Ensure it has been paid first.")
     
-    return redirect('vendor_orders')
+    return redirect('transaction_detail', order_id=order.id)
 
 
 
@@ -314,6 +311,47 @@ def cancel_order(request, order_id):
         messages.error(request, "This order cannot be cancelled.")
     
     return redirect('vendor_orders')
+
+@customer_required
+def pay_order(request, order_id):
+    """
+    Simulate payment for an order
+    """
+    order = get_object_or_404(Order, id=order_id, customer=request.user)
+    
+    if order.status == 'pending':
+        # Simulate payment processing
+        order.status = 'paid'
+        order.payment_status = 'paid'
+        order.transaction_id = f"TRX-{order.id}-SIM"
+        order.save()
+        
+        # Notify vendor
+        Notification.objects.create(
+            user=order.vendor,
+            title="Order Paid",
+            message=f"Order #{order.id} has been paid. Click to review and approve.",
+            notification_type='order_update',
+            target_url=f"/orders/vendor/orders/transaction/{order.id}/"
+        )
+        
+        messages.success(request, f"Payment successful! Order #{order.id} is now awaiting vendor approval.")
+    else:
+        messages.error(request, "This order is not in a payable state.")
+        
+    return redirect('order_detail', order_id=order.id)
+
+@vendor_required
+def transaction_detail(request, order_id):
+    """
+    Vendor view for full transaction details before approval
+    """
+    order = get_object_or_404(Order, id=order_id, vendor=request.user)
+    context = {
+        'order': order,
+        'title': f'Transaction Detail - Order #{order.id}'
+    }
+    return render(request, 'orders/transaction_detail.html', context)
 
 @login_required
 def check_stock(request, product_id):

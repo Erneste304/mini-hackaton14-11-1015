@@ -13,24 +13,22 @@
                     <!-- PROFILE PICTURE - SINGLE VERSION -->
                     <div class="profile-picture mb-3">
                         {% if user.profile_picture %}
-                            <img src="{{ user.profile_picture.url }}" 
-                                 alt="{{ user.username }}" 
-                                 class="rounded-circle" 
-                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="rounded-circle"
+                            style="width: 150px; height: 150px; object-fit: cover;">
                         {% else %}
-                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto"
-                                 style="width: 150px; height: 150px;">
-                                <span class="text-white h4">{{ user.username|first|upper }}</span>
-                            </div>
+                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                            style="width: 150px; height: 150px;">
+                            <span class="text-white h4">{{ user.username|first|upper }}</span>
+                        </div>
                         {% endif %}
                     </div>
-                    
+
                     <h4>{{ user.get_full_name|default:user.username }}</h4>
                     <p class="text-muted">{{ user.email }}</p>
                     <span class="badge bg-info">{{ user.get_user_type_display }}</span>
                 </div>
             </div>
-            
+
             <!-- Quick Stats -->
             <div class="card mt-3">
                 <div class="card-body">
@@ -48,7 +46,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
@@ -57,7 +55,7 @@
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 {{ form.first_name|as_crispy_field }}
@@ -66,27 +64,24 @@
                                 {{ form.last_name|as_crispy_field }}
                             </div>
                         </div>
-                        
+
                         {{ form.email|as_crispy_field }}
                         {{ form.phone|as_crispy_field }}
-                        
+
                         <!-- Profile Picture Upload -->
                         <div class="mb-3">
                             <label class="form-label">Profile Picture</label>
-                            <input type="file" name="profile_picture" class="form-control" accept="image/*">
+                            {{ form.profile_picture }}
                             {% if user.profile_picture %}
-                                <small class="form-text text-success">
-                                    Current picture: {{ user.profile_picture.name }}
-                                </small>
-                            {% else %}
-                                <small class="form-text text-muted">
-                                    Upload a profile picture (optional)
-                                </small>
+                            <div class="mt-2">
+                                <small class="text-success">Current picture: {{
+                                    user.profile_picture.name|truncatechars:30 }}</small>
+                            </div>
                             {% endif %}
                         </div>
-                        
+
                         {{ form.address|as_crispy_field }}
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 {{ form.city|as_crispy_field }}
@@ -95,24 +90,39 @@
                                 {{ form.country|as_crispy_field }}
                             </div>
                         </div>
-                        
+
                         <!-- Notification Preferences -->
-                        <div class="mb-3">
-                            <h6>Notification Preferences</h6>
-                            <div class="form-check">
-                                {{ form.email_notifications }}
-                                <label class="form-check-label">
-                                    Email Notifications
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                {{ form.sms_notifications }}
-                                <label class="form-check-label">
-                                    SMS Notifications
-                                </label>
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Notification Preferences</h6>
+                            <div class="d-flex gap-4">
+                                {{ form.email_notifications|as_crispy_field }}
+                                {{ form.sms_notifications|as_crispy_field }}
                             </div>
                         </div>
-                        
+
+                        <!-- Privacy Settings -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Privacy & Security</h6>
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="publicProfile" checked>
+                                        <label class="form-check-label" for="publicProfile">Public Profile
+                                            Visibility</label>
+                                        <div class="small text-muted">Allow others to see your business/profile details.
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="twoFactor">
+                                        <label class="form-check-label" for="twoFactor">Two-Factor
+                                            Authentication</label>
+                                        <div class="small text-muted">Add an extra layer of security to your account.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Update Profile</button>
                         <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                     </form>

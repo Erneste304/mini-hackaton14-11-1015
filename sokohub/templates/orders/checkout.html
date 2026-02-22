@@ -96,6 +96,20 @@
                         </div>
                     </div>
 
+                    <!-- Payment Information -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Payment Method</h5>
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                {{ form.payment_method|as_crispy_field }}
+                                <div class="mt-2 small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> You will be able to complete the payment on
+                                    the next screen.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Order Total -->
                     <div class="card bg-light border-0">
                         <div class="card-body">

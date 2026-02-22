@@ -6,10 +6,23 @@ from products.models import Product
 class Order(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
+        ('paid', 'Paid'),
+        ('approved', 'Approved'),
         ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
+    )
+    
+    PAYMENT_METHOD_CHOICES = (
+        ('mtn', 'MTN Mobile Money'),
+        ('tigo', 'Tigo Pesa'),
+        ('virtual_card', 'Virtual Card'),
+    )
+    
+    PAYMENT_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('failed', 'Failed'),
     )
 
     customer = models.ForeignKey(
@@ -38,18 +51,33 @@ class Order(models.Model):
     )
     delivery_address = models.TextField()
     phone = models.CharField(max_length=15)
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES,
+        null=True,
+        blank=True
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default='pending'
+    )
+    transaction_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    #status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
     
     def can_be_cancelled(self):
         """" order can not only be cancelled if not shipped and delivered """
-        return self.status in ['pending', 'confirmed']
+        return self.status in ['pending', 'paid', 'approved']
         
     def can_be_confirmed(self):
-        """" vendor can only be confirmed order pending"""
-        return self.status == 'pending'
+        """" vendor can only confirm order if it is paid """
+        return self.status == 'paid'
     
     class Meta:
         ordering = ['-created_at']
@@ -60,7 +88,8 @@ class Order(models.Model):
     def get_status_color(self):
         status_colors = {
             'pending': 'warning',
-            'confirmed': 'info',
+            'paid': 'info',
+            'approved': 'success',
             'shipped': 'primary',
             'delivered': 'success',
             'cancelled': 'danger',

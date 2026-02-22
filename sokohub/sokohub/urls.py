@@ -10,6 +10,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('orders/', include('orders.urls')),
     path('cart/', include('cart.urls')),
+    path('notifications/', include('notifications.urls')),
 
     # Top-level logout fallback (safe to have)
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),

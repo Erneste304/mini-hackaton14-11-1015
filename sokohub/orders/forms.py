@@ -30,6 +30,16 @@ class CheckoutForm(forms.Form):
         }),
         label="Quantity"
     )
+    payment_method = forms.ChoiceField(
+        choices=[
+            ('mtn', 'MTN Mobile Money'),
+            ('tigo', 'Tigo Pesa'),
+            ('virtual_card', 'Virtual Card'),
+        ],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+        label="Payment Method",
+        required=True
+    )
 
     def clean_delivery_address(self):
         address = self.cleaned_data.get('delivery_address')

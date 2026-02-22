@@ -33,12 +33,32 @@
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Total Amount:</strong> ${{ order.total }}</p>
+                                <p><strong>Payment Method:</strong> <span class="text-uppercase">{{
+                                        order.get_payment_method_display }}</span></p>
                                 <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
                                 <p><strong>Contact Phone:</strong> {{ order.phone }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {% if order.status == 'pending' %}
+                <div class="card mb-4 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Complete Your Payment</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p>To process your order, please click the button below to simulate payment via <strong>{{
+                                order.get_payment_method_display }}</strong>.</p>
+                        <form action="{% url 'pay_order' order.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i> Pay Now (${{ order.total }})
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
 
                 <div class="card mb-4">
                     <div class="card-header">
@@ -49,9 +69,11 @@
                         <div class="row align-items-center mb-3">
                             <div class="col-md-2">
                                 {% if item.product.image %}
-                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                    class="img-fluid rounded">
                                 {% else %}
-                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 60px;">
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                    style="height: 60px;">
                                     <span class="text-muted small">No image</span>
                                 </div>
                                 {% endif %}
@@ -65,7 +87,8 @@
                                 <strong>Subtotal: ${{ item.get_subtotal }}</strong>
                             </div>
                         </div>
-                        {% if not forloop.last %}<hr>{% endif %}
+                        {% if not forloop.last %}
+                        <hr>{% endif %}
                         {% endfor %}
                     </div>
                 </div>

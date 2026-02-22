@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, UserProfileForm
 from .models import User
 from .decorators import vendor_required, customer_required
 
@@ -88,11 +88,21 @@ def login_view(request):
 
 @login_required
 def profile(request):
-    """User profile redirect"""
-    if request.user.is_vendor():
-        return redirect('vendor_dashboard')
+    """User profile view and update"""
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')
     else:
-        return redirect('customer_orders')
+        form = UserProfileForm(instance=request.user)
+    
+    context = {
+        'form': form,
+        'title': 'My Profile - Soko Hub'
+    }
+    return render(request, 'accounts/profile.html', context)
 
 
 @vendor_required
@@ -117,4 +127,9 @@ def profile_redirect(request):
 
 @login_required
 def all_notifications(request):
-    return render(request, 'accounts/notifications.html', {'title': 'Notifications - Soko Hub'})
+    from notifications.models import Notification
+    notifs = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'accounts/notifications.html', {
+        'title': 'My Notifications - Soko Hub',
+        'recent_notifications': notifs
+    })

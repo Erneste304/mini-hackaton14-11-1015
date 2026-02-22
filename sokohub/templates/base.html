@@ -129,7 +129,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
               <li>
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="{% url 'profile' %}">
                   <i class="fas fa-user-circle me-2"></i>My Profile
                 </a>
               </li>
@@ -212,7 +212,7 @@
             Rwanda's trusted online marketplace. Buy from verified vendors or grow your business by selling to thousands
             of customers.
           </p>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 mb-4">
             <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" title="Facebook">
               <i class="fab fa-facebook-f"></i>
             </a>
@@ -224,6 +224,29 @@
             </a>
             <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" title="WhatsApp">
               <i class="fab fa-whatsapp"></i>
+            </a>
+          </div>
+
+          <!-- App Store Buttons -->
+          <h6 class="text-white mb-3 text-uppercase small fw-bold">Download Our App</h6>
+          <div class="d-flex flex-column gap-2">
+            <a href="#"
+              class="btn btn-dark btn-sm border-secondary d-flex align-items-center justify-content-center py-2 px-3"
+              style="width: 160px; border-radius: 8px;">
+              <i class="fab fa-apple fa-2x me-2"></i>
+              <div class="text-start">
+                <div style="font-size: 8px;">Download on the</div>
+                <div class="fw-bold" style="font-size: 14px; line-height: 1;">App Store</div>
+              </div>
+            </a>
+            <a href="#"
+              class="btn btn-dark btn-sm border-secondary d-flex align-items-center justify-content-center py-2 px-3"
+              style="width: 160px; border-radius: 8px;">
+              <i class="fab fa-google-play fa-lg me-2"></i>
+              <div class="text-start">
+                <div style="font-size: 8px;">GET IT ON</div>
+                <div class="fw-bold" style="font-size: 14px; line-height: 1;">Google Play</div>
+              </div>
             </a>
           </div>
         </div>

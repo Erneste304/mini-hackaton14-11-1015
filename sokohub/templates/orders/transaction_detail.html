@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Transaction Detail - Order #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'vendor_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'vendor_orders' %}">Orders</a></li>
+            <li class="breadcrumb-item active">Transaction #{{ order.id }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Transaction Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Order ID</div>
+                        <div class="col-sm-8 fw-bold">#{{ order.id }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Customer</div>
+                        <div class="col-sm-8">{{ order.customer.username }} ({{ order.phone }})</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Payment Method</div>
+                        <div class="col-sm-8 text-uppercase">{{ order.get_payment_method_display }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Payment Status</div>
+                        <div class="col-sm-8">
+                            <span
+                                class="badge {% if order.payment_status == 'paid' %}bg-success{% elif order.payment_status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ order.get_payment_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% if order.transaction_id %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Transaction ID</div>
+                        <div class="col-sm-8"><code>{{ order.transaction_id }}</code></div>
+                    </div>
+                    {% endif %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Total Amount</div>
+                        <div class="col-sm-8 fw-bold text-primary">${{ order.total }}</div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3">Items Purchased</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>${{ item.price }}</td>
+                                    <td>${{ item.get_subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.status == 'paid' %}
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        The customer has marked this order as paid via <strong>{{ order.get_payment_method_display
+                            }}</strong>. Please verify the transaction before approving.
+                    </div>
+                    <form action="{% url 'approve_order' order.id %}" method="POST" class="d-grid gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-1"></i> Approve Transaction
+                        </button>
+                    </form>
+                    {% elif order.status == 'pending' %}
+                    <div class="alert alert-warning small">
+                        This order is waiting for customer payment.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-secondary small">
+                        Order status: <strong>{{ order.get_status_display }}</strong>
+                    </div>
+                    {% endif %}
+
+                    {% if order.can_be_cancelled %}
+                    <form action="{% url 'cancel_order' order.id %}" method="POST" class="d-grid gap-2 mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-times me-1"></i> Cancel Order
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,6 +2,27 @@
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
 
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'email', 'phone', 
+            'address', 'city', 'country', 'profile_picture',
+            'email_notifications', 'sms_notifications'
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'country': forms.TextInput(attrs={'class': 'form-control'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
+            'email_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
 class UserRegistrationForm(UserCreationForm):
     user_type = forms.ChoiceField(
         choices=User.USER_TYPE_CHOICES,

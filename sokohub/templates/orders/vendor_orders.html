@@ -37,54 +37,71 @@
                     </thead>
                     <tbody>
                         {% for order in orders %}
-                        <tr>
+                        <tr class="{% if order.status == 'paid' %}table-warning{% endif %}">
                             <td class="ps-3">
                                 <span class="fw-bold text-primary">#{{ order.id }}</span>
                                 <div class="small text-muted">{{ order.created_at|date:"M d, Y" }}</div>
                             </td>
                             <td>
-                                <div class="d-flex flex-column gap-1">
-                                    {% for item in order.items.all %}
-                                    <div class="d-flex align-items-center small">
-                                        {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
-                                            class="rounded me-1" style="width: 24px; height: 24px; object-fit: cover;">
-                                        {% endif %}
-                                        <span>{{ item.quantity }}x {{ item.product.name }}</span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fw-bold">{{ order.customer.username }}</div>
+                                <div class="small fw-bold">{{ order.customer.username }}</div>
                                 <div class="small text-muted">{{ order.phone }}</div>
                             </td>
-                            <td><strong class="text-dark">${{ order.total }}</strong></td>
                             <td>
-                                <span class="badge bg-{{ order.get_status_color }} py-2 px-3">
+                                <div class="small text-muted text-uppercase">{{ order.get_payment_method_display }}
+                                </div>
+                                <a href="{% url 'transaction_detail' order.id %}" class="small">View Full
+                                    Transaction</a>
+                            </td>
+                            <td><span class="fw-bold text-primary">${{ order.total }}</span></td>
+                            <td>
+                                <!-- Order status -->
+                                <span class="badge bg-{{ order.get_status_color }} mb-1 d-block">
                                     {{ order.get_status_display }}
                                 </span>
-                            </td>
-                            <td class="text-end pe-3">
-                                {% if order.status == 'pending' %}
-                                <div class="btn-group">
-                                    <a href="{% url 'approve_order' order.id %}"
-                                        class="btn btn-sm btn-success d-flex align-items-center"
-                                        onclick="return confirm('Approve this order? Stock will be deducted.')">
-                                        <i class="fas fa-check me-1"></i> Approve
-                                    </a>
-                                    <a href="{% url 'cancel_order' order.id %}" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Cancel this order?')">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                </div>
-                                {% elif order.status == 'confirmed' %}
-                                <span class="badge bg-light text-success border border-success px-3">
-                                    <i class="fas fa-check-double me-1"></i> Confirmed
+                                <!-- Payment status -->
+                                {% if order.payment_status == 'paid' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Payment Received
                                 </span>
                                 {% else %}
-                                <span class="text-muted small">No actions</span>
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fas fa-clock me-1"></i>Awaiting Payment
+                                </span>
                                 {% endif %}
+
+                                {% if order.status == 'paid' %}
+                                <div class="mt-1">
+                                    <span class="badge bg-danger animate-pulse">
+                                        <i class="fas fa-bell me-1"></i>Needs Approval!
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="d-flex justify-content-end gap-1">
+                                    {% if order.can_be_confirmed %}
+                                    <form action="{% url 'approve_order' order.id %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success" title="Approve Order">
+                                            <i class="fas fa-check me-1"></i>Approve
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if order.status == 'pending' %}
+                                    <form action="{% url 'cancel_order' order.id %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    <a href="{% url 'transaction_detail' order.id %}"
+                                        class="btn btn-sm btn-outline-secondary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}

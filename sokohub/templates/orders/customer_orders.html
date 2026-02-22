@@ -4,33 +4,101 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>My Orders</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="fas fa-shopping-bag me-2 text-primary"></i>My Orders</h4>
+        <a href="{% url 'product_list' %}" class="btn btn-sm btn-outline-primary">Continue Shopping</a>
+    </div>
 
     {% if orders %}
-    <div class="row">
+    <div class="row g-4">
         {% for order in orders %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Order #{{ order.id }}</h5>
-                    <span class="badge bg-{{ order.get_status_color }}">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold">
+                        <a href="{% url 'order_detail' order.id %}" class="text-decoration-none text-dark">
+                            <i class="fas fa-receipt me-1 text-primary"></i> Order #{{ order.id }}
+                        </a>
+                    </h6>
+                    <span class="badge bg-{{ order.get_status_color }} py-2 px-3">
                         {{ order.get_status_display }}
                     </span>
                 </div>
                 <div class="card-body">
-                    <p><strong>Date:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
-                    <p><strong>Total:</strong> ${{ order.total }}</p>
-                    <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Date Placed</small>
+                            <span class="small fw-semibold">{{ order.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="col-6 text-end">
+                            <small class="text-muted d-block">Total Amount</small>
+                            <span class="fw-bold text-primary">${{ order.total }}</span>
+                        </div>
+                    </div>
 
-                    <h6>Items:</h6>
-                    <ul class="list-group list-group-flush">
+                    <small class="text-muted d-block mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>{{ order.delivery_address }}
+                    </small>
+
+                    <small class="text-muted d-block mb-3">
+                        <i class="fas fa-credit-card me-1"></i>Payment:
+                        <span class="text-uppercase fw-semibold">{{ order.get_payment_method_display }}</span>
+                        &nbsp;—&nbsp;
+                        {% if order.payment_status == 'paid' %}
+                        <span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Paid</span>
+                        {% else %}
+                        <span class="text-warning fw-bold"><i class="fas fa-clock me-1"></i>Awaiting Payment</span>
+                        {% endif %}
+                    </small>
+
+                    <!-- Items summary -->
+                    <ul class="list-group list-group-flush mb-3">
                         {% for item in order.items.all %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>{{ item.product.name }} (x{{ item.quantity }})</span>
-                            <span>${{ item.get_subtotal }}</span>
+                        <li class="list-group-item px-0 py-1 border-0 d-flex justify-content-between small">
+                            <span>{{ item.product.name }} <span class="text-muted">x{{ item.quantity }}</span></span>
+                            <strong>${{ item.get_subtotal }}</strong>
                         </li>
                         {% endfor %}
                     </ul>
+                </div>
+
+                <div class="card-footer bg-white border-0 pb-3">
+                    {% if order.status == 'pending' %}
+                    <!-- ✅ Pay Now button: only shows when status is pending -->
+                    <form action="{% url 'pay_order' order.id %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm me-2">
+                            <i class="fas fa-credit-card me-1"></i> Pay Now (${{ order.total }})
+                        </button>
+                    </form>
+                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">View
+                        Details</a>
+
+                    {% elif order.status == 'paid' %}
+                    <!-- 🔒 Paid: lock out cancel, show waiting message -->
+                    <span class="badge bg-info py-2 px-3 me-2">
+                        <i class="fas fa-hourglass-half me-1"></i> Awaiting Vendor Approval
+                    </span>
+                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">View
+                        Details</a>
+
+                    {% elif order.status == 'approved' %}
+                    <!-- ✅ Approved -->
+                    <span class="badge bg-success py-2 px-3 me-2">
+                        <i class="fas fa-check-double me-1"></i> Approved by Vendor
+                    </span>
+                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">View
+                        Details</a>
+
+                    {% elif order.status == 'cancelled' %}
+                    <span class="badge bg-danger py-2 px-3">
+                        <i class="fas fa-times me-1"></i> Cancelled
+                    </span>
+
+                    {% else %}
+                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">View
+                        Details</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -38,10 +106,10 @@
     </div>
     {% else %}
     <div class="text-center py-5">
-        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
-        <h4 class="text-muted">No Orders Yet</h4>
-        <p class="text-muted">You haven't placed any orders yet.</p>
-        <a href="{% url 'product_list' %}" class="btn btn-primary">Start Shopping</a>
+        <i class="fas fa-shopping-bag fa-4x text-muted mb-4"></i>
+        <h5 class="text-muted">No Orders Yet</h5>
+        <p class="text-muted">You haven't placed any orders yet. Start shopping!</p>
+        <a href="{% url 'product_list' %}" class="btn btn-primary mt-2">Browse Products</a>
     </div>
     {% endif %}
 </div>
