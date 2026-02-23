@@ -55,69 +55,30 @@ Soko Hub is built with a focus on simplicity and core functionality. It provides
 
 ---
 
-## 📁 Project Structure
+## ✨ Why Choose Soko Hub?
 
-```
-mini-hackaton14-11-1015/
-│
-├── sokohub/                        # Django project root
-│   │
-│   ├── accounts/                   # User management & profiles
-│   │   ├── models.py               # Custom User model (vendor/customer roles)
-│   │   ├── views.py                # Login, register, profile update
-│   │   ├── forms.py                # Registration & Profile forms
-│   │   ├── decorators.py           # Role-based access decorators
-│   │   └── urls.py
-│   │
-│   ├── products/                   # Product catalog & vendor tools
-│   │   ├── models.py               # Product model with categories & stock
-│   │   ├── views.py                # Product CRUD, vendor dashboard
-│   │   └── urls.py
-│   │
-│   ├── orders/                     # Order lifecycle management
-│   │   ├── models.py               # Order, OrderItem, payment fields
-│   │   ├── views.py                # Checkout, payment, approval, order detail
-│   │   ├── forms.py                # Checkout form with payment method
-│   │   └── urls.py
-│   │
-│   ├── cart/                       # Shopping cart session management
-│   │   ├── models.py
-│   │   ├── views.py
-│   │   └── urls.py
-│   │
-│   ├── notifications/              # In-app notification system
-│   │   ├── models.py               # Notification model with target_url
-│   │   ├── views.py                # Mark as read & redirect
-│   │   └── urls.py
-│   │
-│   ├── templates/                  # HTML templates (per app)
-│   │   ├── base.html               # Global layout with nav, footer & app links
-│   │   ├── accounts/
-│   │   │   ├── login.html
-│   │   │   ├── register.html
-│   │   │   └── profile.html        # Profile + Privacy settings
-│   │   ├── orders/
-│   │   │   ├── checkout.html
-│   │   │   ├── order_confirmation.html
-│   │   │   ├── order_detail.html   # Customer order status view
-│   │   │   ├── customer_orders.html
-│   │   │   ├── vendor_orders.html
-│   │   │   └── transaction_detail.html  # Vendor review & approve
-│   │   └── includes/
-│   │       └── notifications_dropdown.html
-│   │
-│   ├── static/                     # CSS, JavaScript, images
-│   ├── media/                      # Uploaded files (product & profile images)
-│   └── sokohub/                    # Project settings & main URLs
-│       ├── settings.py
-│       ├── urls.py
-│       └── context_processors.py
-│
-├── Venv/                           # Python virtual environment
-├── requirements.txt
-├── .gitignore
-└── README.md
-```
+**Soko Hub** isn't just a marketplace; it's a bridge between Rwandan vendors and thousands of waiting customers. Whether you're a small business owner looking to digitize or a shopper searching for quality products, Soko Hub is designed for *you*.
+
+- 🚀 **Fast & Intuitive**: A modern interface that makes shopping a breeze.
+- 🔒 **Secure Local Payments**: Integration with trusted Rwandan mobile money providers (Simulated).
+- 📱 **Mobile-First Design**: Accessible from any device, anywhere, anytime.
+- 💼 **Professional Vendor Tools**: Everything you need to scale your business.
+
+---
+
+## 💎 Key Highlights
+
+### 🎨 Beautiful, Modern Interface
+Our platform uses the latest **Bootstrap 5** design patterns, featuring clean layouts, smooth hover effects, and a responsive experience that looks great on desktops, tablets, and mobile phones.
+
+### ⚡ Dynamic Product Discovery
+Find what you need instantly with our **Categorized Navigation** and powerful **Search** functionality. Explore everything from the latest electronics to fresh local groceries with ease.
+
+### 🛡️ Secure Transaction Workflow
+Our custom order lifecycle ensures that both buyers and sellers are protected. With a multi-step approval flow and detailed transaction reviews, you can trade with confidence.
+
+### 🔔 Real-Time Alerts
+Never miss a beat! Our integrated notification system keeps you updated on order status, payments, and approvals, ensuring a smooth and transparent business flow.
 
 ---
 
