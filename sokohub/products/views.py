@@ -218,3 +218,18 @@ def edit_product(request, product_id):
         'title': f'Edit {product.name}'
     }
     return render(request, 'products/edit_product.html', context)
+
+
+def privacy_policy(request):
+    """Privacy Policy page view"""
+    return render(request, 'products/privacy_policy.html', {'title': 'Privacy Policy - Soko Hub'})
+
+
+def terms_of_service(request):
+    """Terms of Service page view"""
+    return render(request, 'products/terms_of_service.html', {'title': 'Terms of Service - Soko Hub'})
+
+
+def help_center(request):
+    """Help Center page view"""
+    return render(request, 'products/help_center.html', {'title': 'Help Center - Soko Hub'})

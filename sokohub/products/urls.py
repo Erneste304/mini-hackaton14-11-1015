@@ -16,4 +16,8 @@ urlpatterns = [
     path('vendor/products/add/', views.add_product, name='add_product'),
     path('vendor/products/edit/<int:product_id>/', views.edit_product, name='edit_product'),
     #path('vendor/products/delete/<int:product_id>/', views.delete_product, name='delete_product'),
+    # Legal and Support pages
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
+    path('help-center/', views.help_center, name='help_center'),
 ]
