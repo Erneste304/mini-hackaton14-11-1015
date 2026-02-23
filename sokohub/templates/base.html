@@ -213,16 +213,20 @@
             of customers.
           </p>
           <div class="d-flex gap-2 mb-4">
-            <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" title="Facebook">
+            <a href="https://www.facebook.com/sokohub" class="btn btn-outline-secondary btn-sm rounded-circle"
+              title="Facebook" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-facebook-f"></i>
             </a>
-            <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" title="Twitter">
+            <a href="https://x.com/sokohub" class="btn btn-outline-secondary btn-sm rounded-circle" title="Twitter"
+              target="_blank" rel="noopener noreferrer">
               <i class="fab fa-twitter"></i>
             </a>
-            <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" title="Instagram">
+            <a href="https://www.instagram.com/sokohub" class="btn btn-outline-secondary btn-sm rounded-circle"
+              title="Instagram" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-instagram"></i>
             </a>
-            <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" title="WhatsApp">
+            <a href="https://wa.me/250780000000" class="btn btn-outline-secondary btn-sm rounded-circle"
+              title="WhatsApp" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-whatsapp"></i>
             </a>
           </div>
@@ -230,18 +234,18 @@
           <!-- App Store Buttons -->
           <h6 class="text-white mb-3 text-uppercase small fw-bold">Download Our App</h6>
           <div class="d-flex flex-column gap-2">
-            <a href="#"
+            <a href="https://apps.apple.com/app/sokohub"
               class="btn btn-dark btn-sm border-secondary d-flex align-items-center justify-content-center py-2 px-3"
-              style="width: 160px; border-radius: 8px;">
+              style="width: 160px; border-radius: 8px;" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-apple fa-2x me-2"></i>
               <div class="text-start">
                 <div style="font-size: 8px;">Download on the</div>
                 <div class="fw-bold" style="font-size: 14px; line-height: 1;">App Store</div>
               </div>
             </a>
-            <a href="#"
+            <a href="https://play.google.com/store/apps/details?id=rw.sokohub.app"
               class="btn btn-dark btn-sm border-secondary d-flex align-items-center justify-content-center py-2 px-3"
-              style="width: 160px; border-radius: 8px;">
+              style="width: 160px; border-radius: 8px;" target="_blank" rel="noopener noreferrer">
               <i class="fab fa-google-play fa-lg me-2"></i>
               <div class="text-start">
                 <div style="font-size: 8px;">GET IT ON</div>
@@ -272,14 +276,18 @@
         <div class="col-md-2">
           <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing:1px; font-size:12px;">Categories</h6>
           <ul class="list-unstyled mb-0" style="font-size:14px;">
-            <li class="mb-2"><a href="#" class="text-secondary text-decoration-none hover-link"><i
-                  class="fas fa-chevron-right me-1" style="font-size:10px;"></i>Electronics</a></li>
-            <li class="mb-2"><a href="#" class="text-secondary text-decoration-none hover-link"><i
-                  class="fas fa-chevron-right me-1" style="font-size:10px;"></i>Clothing</a></li>
-            <li class="mb-2"><a href="#" class="text-secondary text-decoration-none hover-link"><i
-                  class="fas fa-chevron-right me-1" style="font-size:10px;"></i>Food &amp; Groceries</a></li>
-            <li class="mb-2"><a href="#" class="text-secondary text-decoration-none hover-link"><i
-                  class="fas fa-chevron-right me-1" style="font-size:10px;"></i>Home &amp; Garden</a></li>
+            <li class="mb-2"><a href="{% url 'product_list_by_category' category_slug='electronics' %}"
+                class="text-secondary text-decoration-none hover-link"><i class="fas fa-chevron-right me-1"
+                  style="font-size:10px;"></i>Electronics</a></li>
+            <li class="mb-2"><a href="{% url 'product_list' %}?search=clothing"
+                class="text-secondary text-decoration-none hover-link"><i class="fas fa-chevron-right me-1"
+                  style="font-size:10px;"></i>Clothing</a></li>
+            <li class="mb-2"><a href="{% url 'product_list' %}?search=food"
+                class="text-secondary text-decoration-none hover-link"><i class="fas fa-chevron-right me-1"
+                  style="font-size:10px;"></i>Food &amp; Groceries</a></li>
+            <li class="mb-2"><a href="{% url 'product_list_by_category' category_slug='home' %}"
+                class="text-secondary text-decoration-none hover-link"><i class="fas fa-chevron-right me-1"
+                  style="font-size:10px;"></i>Home &amp; Garden</a></li>
           </ul>
         </div>
 
