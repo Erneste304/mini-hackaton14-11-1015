@@ -19,7 +19,10 @@
                     <h3 class="h5 fw-bold">Buying on Soko Hub</h3>
                     <p class="text-secondary small">Everything you need to know about finding products and placing
                         orders.</p>
-                    <a href="#" class="btn btn-outline-primary btn-sm mt-auto">Learn More</a>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-auto" data-bs-toggle="modal"
+                        data-bs-target="#buyingModal">
+                        Learn More
+                    </button>
                 </div>
             </div>
             <div class="col-md-4">
@@ -29,7 +32,10 @@
                     </div>
                     <h3 class="h5 fw-bold">Selling on Soko Hub</h3>
                     <p class="text-secondary small">Get tips on how to manage your store and grow your business.</p>
-                    <a href="#" class="btn btn-outline-success btn-sm mt-auto">Learn More</a>
+                    <button type="button" class="btn btn-outline-success btn-sm mt-auto" data-bs-toggle="modal"
+                        data-bs-target="#sellingModal">
+                        Learn More
+                    </button>
                 </div>
             </div>
             <div class="col-md-4">
@@ -40,7 +46,10 @@
                     <h3 class="h5 fw-bold">Shipping & Returns</h3>
                     <p class="text-secondary small">Information about delivery times, tracking, and our return policy.
                     </p>
-                    <a href="#" class="btn btn-outline-warning btn-sm mt-auto">Learn More</a>
+                    <button type="button" class="btn btn-outline-warning btn-sm mt-auto" data-bs-toggle="modal"
+                        data-bs-target="#shippingModal">
+                        Learn More
+                    </button>
                 </div>
             </div>
         </div>
@@ -84,6 +93,133 @@
         <div class="mt-5 text-center">
             <p class="text-secondary">Still need help? <a href="{% url 'contact' %}" class="fw-bold">Contact our support
                     team</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- Modals Section -->
+
+<!-- Buying Modal -->
+<div class="modal fade" id="buyingModal" tabindex="-1" aria-labelledby="buyingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title fw-bold" id="buyingModalLabel"><i class="fas fa-shopping-cart me-2"></i>Buying on
+                    Soko Hub</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-search me-2"></i>Finding Products</h6>
+                        <p class="small text-secondary">Use the search bar at the top of every page to find specific
+                            items. You can also browse by categories like Electronics, Clothing, and Groceries.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-check-circle me-2"></i>Placing an Order</h6>
+                        <p class="small text-secondary">Once you find a product, add it to your cart. Review your items
+                            in the cart, click "Proceed to Checkout", and choose your payment method.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-wallet me-2"></i>Payment Methods</h6>
+                        <p class="small text-secondary">We support local payment options including Mobile Money (MTN &
+                            Airtel) and credit cards through our secure payment gateway.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-user-shield me-2"></i>Buyer Protection</h6>
+                        <p class="small text-secondary">Your payments are held securely until you confirm receipt of the
+                            item. This ensures a safe trading environment for all users.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'product_list' %}" class="btn btn-primary btn-sm">Start Shopping</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Selling Modal -->
+<div class="modal fade" id="sellingModal" tabindex="-1" aria-labelledby="sellingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white border-0">
+                <h5 class="modal-title fw-bold" id="sellingModalLabel"><i class="fas fa-store me-2"></i>Selling on Soko
+                    Hub</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success"><i class="fas fa-plus-square me-2"></i>Adding Products</h6>
+                        <p class="small text-secondary">From your Vendor Dashboard, you can quickly add new products
+                            with descriptions, prices, and high-quality images to attract buyers.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success"><i class="fas fa-tasks me-2"></i>Managing Orders</h6>
+                        <p class="small text-secondary">Receive real-time notifications for every new order. Review and
+                            approve transactions directly from your Orders management panel.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success"><i class="fas fa-chart-line me-2"></i>Sales Analytics</h6>
+                        <p class="small text-secondary">Track your business growth using our dashboard. Monitor your
+                            total sales, active inventory, and top-selling products.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-success"><i class="fas fa-handshake me-2"></i>Vendor Success</h6>
+                        <p class="small text-secondary">Build trust with your customers by providing accurate
+                            descriptions and fast shipping. Highly-rated vendors get more visibility!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'vendor_dashboard' %}" class="btn btn-success btn-sm">Go to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shipping Modal -->
+<div class="modal fade" id="shippingModal" tabindex="-1" aria-labelledby="shippingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold" id="shippingModalLabel"><i class="fas fa-truck me-2"></i>Shipping &
+                    Returns</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark"><i class="fas fa-shipping-fast me-2"></i>Delivery Times</h6>
+                        <p class="small text-secondary">Estimated delivery within Kigali is 24-48 hours. For upcountry
+                            deliveries, expect items within 3-5 business days.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark"><i class="fas fa-map-marked-alt me-2"></i>Order Tracking</h6>
+                        <p class="small text-secondary">Stay informed! Track your order's progress from "Processing" to
+                            "Shipped" through your personal orders dashboard.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark"><i class="fas fa-undo me-2"></i>Return Policy</h6>
+                        <p class="small text-secondary">We offer a 7-day return period if the item does not match the
+                            description or is faulty. Ensure the item is in its original packaging.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark"><i class="fas fa-headset me-2"></i>Support Support</h6>
+                        <p class="small text-secondary">Need help with a delivery? Our support team is available via
+                            chat or email to resolve any shipping issues promptly.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'contact' %}" class="btn btn-warning btn-sm text-dark">Contact Support</a>
+            </div>
         </div>
     </div>
 </div>
