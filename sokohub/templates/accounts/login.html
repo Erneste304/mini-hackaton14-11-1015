@@ -98,7 +98,7 @@
                             <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me" />
                             <label class="form-check-label small" for="remember_me">Remember me</label>
                         </div>
-                        <a href="#" class="small text-primary">Forgot password?</a>
+                        <a href="{% url 'password_reset' %}" class="small text-primary">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3"
@@ -119,6 +119,12 @@
                         <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" alt="Google"
                             style="width: 20px; height: 20px;">
                         Continue with Google
+                    </a>
+                </div>
+
+                <div class="text-center mb-4">
+                    <a href="{% url 'send_otp' %}" class="text-primary small fw-semibold">
+                        <i class="fas fa-envelope me-1"></i> Login with Email OTP
                     </a>
                 </div>
 

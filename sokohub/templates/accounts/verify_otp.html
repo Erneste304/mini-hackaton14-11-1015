@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0" style="border-radius: 16px;">
+            <div class="card-body p-4 p-lg-5">
+                <div class="text-center mb-4">
+                    <div class="display-4 mb-3">🔢</div>
+                    <h3 class="fw-bold">Verify OTP</h3>
+                    <p class="text-muted">We've sent a 5-digit code to <strong>{{ email }}</strong></p>
+                </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="otp" class="form-label fw-semibold text-center d-block">Enter 5-Digit Code</label>
+                        <input type="text" name="otp" id="otp" class="form-control form-control-lg text-center fw-bold"
+                            placeholder="· · · · ·" maxlength="5" pattern="\d{5}" required
+                            style="letter-spacing: 0.5rem; font-size: 2rem; border-radius: 12px; border: 2px solid #e0e0e0;">
+                        <div class="form-text text-center mt-2">The code expires in 3 minutes.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3"
+                        style="border-radius:10px;">
+                        Verify & Login
+                    </button>
+
+                    <div class="text-center">
+                        <a href="{% url 'send_otp' %}" class="text-decoration-none small">
+                            Didn't receive code? Resend
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

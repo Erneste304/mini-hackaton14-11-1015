@@ -189,18 +189,19 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ─── Email Configuration ───────────────────────────────────────────────────────
-# ⚠️  DEVELOPMENT MODE: Emails will print to your terminal (console).
-# To send real emails, comment out the ConsoleBackend line and uncomment the SMTP block.
+# ✅ REAL SMTP MODE: Sending emails via Gmail.
+# IMPORTANT: You MUST put a 16-character "App Password" in your .env for this to work!
+# To go back to terminal-testing, comment out the SMTP lines and uncomment the Console line.
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'ernestegisubizo83@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'ernestegisubizo83@gmail.com')
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-gmail@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-16-char-app-password'
-# DEFAULT_FROM_EMAIL = 'Soko Hub <your-gmail@gmail.com>'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # OTP settings
-OTP_EXPIRY_MINUTES = 10
+OTP_EXPIRY_MINUTES = 3

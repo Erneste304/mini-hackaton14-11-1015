@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0" style="border-radius: 16px;">
+            <div class="card-body p-4 p-lg-5">
+                <div class="text-center mb-4">
+                    <div class="display-4 mb-3">📧</div>
+                    <h3 class="fw-bold">Login with Email</h3>
+                    <p class="text-muted">Enter your registered email to receive a 5-digit OTP.</p>
+                </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="email" class="form-label fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-envelope text-muted"></i>
+                            </span>
+                            <input type="email" name="email" id="email" class="form-control border-start-0 ps-0"
+                                placeholder="e.g. name@example.com" required style="border-radius: 0 8px 8px 0;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-semibold mb-3"
+                        style="border-radius:10px;">
+                        Send OTP Code
+                    </button>
+
+                    <div class="text-center">
+                        <a href="{% url 'login' %}" class="text-decoration-none small text-muted">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Password Login
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

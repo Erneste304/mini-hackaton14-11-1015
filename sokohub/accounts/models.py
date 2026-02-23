@@ -46,3 +46,17 @@ class User(AbstractUser):
         return ', '.join(filter(None, parts))
 
 
+class EmailOTP(models.Model):
+    email = models.EmailField()
+    otp = models.CharField(max_length=5)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        # OTP is valid for 3 minutes
+        expiration_time = self.created_at + timezone.timedelta(minutes=3)
+        return timezone.now() <= expiration_time
+
+    def __str__(self):
+        return f"OTP for {self.email} - {self.otp}"
+
+

@@ -1,3 +1,5 @@
+import random
+import string
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
@@ -12,7 +14,6 @@ from .decorators import vendor_required, customer_required
 def register(request):
     """
     Handle user registration for both vendors and customers.
-    After saving, user is set inactive until OTP is verified.
     """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST, request.FILES)
@@ -21,7 +22,7 @@ def register(request):
 
             messages.success(
                 request,
-                f'🎉 Account created successfully! You can now log in, {user.username}.'
+                f'🎉 Account created successfully! Please verify your email to log in, {user.username}.'
             )
             return redirect('login')
         else:
@@ -40,8 +41,8 @@ def register(request):
 
 def login_view(request):
     """
-    Custom login view: after Django authenticates, check email_verified.
-    Unverified users are sent to the OTP page.
+    Custom login view: authenticate credentials, then send a 5-digit OTP.
+    Actual login() happens only after OTP verification.
     """
     from django.contrib.auth import authenticate as auth_authenticate
 
@@ -54,31 +55,36 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Try to find and authenticate user (even if inactive to check email)
-        try:
-            user_obj = User.objects.get(username=username)
-        except User.DoesNotExist:
-            try:
-                user_obj = User.objects.get(email=username)
-            except User.DoesNotExist:
-                user_obj = None
-
         # Normal authentication
         user = auth_authenticate(request, username=username, password=password)
-        if user is None and user_obj:
-            # maybe they used email as username field
-            user = auth_authenticate(request, username=user_obj.username, password=password)
+        if user is None:
+            # check if they used email
+            try:
+                user_obj = User.objects.get(email=username)
+                user = auth_authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                pass
 
         if user is not None:
-            login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
+            # Generate and send 5-digit OTP
+            otp_code = ''.join(random.choices(string.digits, k=5))
+            from .models import EmailOTP
+            EmailOTP.objects.create(email=user.email, otp=otp_code)
+
+            # Send Email
+            from django.core.mail import send_mail
+            from django.conf import settings
             
-            next_url = request.GET.get('next')
-            if next_url:
-                return redirect(next_url)
-            if user.is_vendor():
-                return redirect('vendor_dashboard')
-            return redirect('product_list')
+            subject = "Your Soko Hub Login Verification"
+            message = f"Hello {user.username},\n\nYour 5-digit verification code is: {otp_code}\n\nThis code will expire in 3 minutes."
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
+            # Defer login: store user ID and email in session
+            request.session['pending_user_id'] = user.id
+            request.session['otp_email'] = user.email
+            
+            messages.success(request, f"A 5-digit verification code has been sent to {user.email}.")
+            return redirect('verify_otp')
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
 
@@ -132,4 +138,84 @@ def all_notifications(request):
     return render(request, 'accounts/notifications.html', {
         'title': 'My Notifications - Soko Hub',
         'recent_notifications': notifs
+    })
+
+
+def send_otp(request):
+    """Generates and sends a 5-digit OTP to the user's email."""
+    if request.method == "POST":
+        email = request.POST.get('email')
+        if not email:
+            messages.error(request, "Email is required.")
+            return redirect('login')
+
+        try:
+            user = User.objects.get(email=email)
+            # Generate 5-digit random OTP
+            otp_code = ''.join(random.choices(string.digits, k=5))
+            
+            # Save OTP to database
+            from .models import EmailOTP
+            EmailOTP.objects.create(email=email, otp=otp_code)
+
+            # Send Email
+            from django.core.mail import send_mail
+            from django.conf import settings
+            
+            subject = "Your Soko Hub Login OTP"
+            message = f"Hello {user.username},\n\nYour 5-digit login OTP is: {otp_code}\n\nThis code will expire in 5 minutes."
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+
+            request.session['otp_email'] = email
+            messages.success(request, f"A 5-digit OTP has been sent to {email}.")
+            return redirect('verify_otp')
+        except User.DoesNotExist:
+            messages.error(request, "This email is not registered.")
+            return redirect('login')
+    
+    return render(request, 'accounts/send_otp.html', {'title': 'Send OTP - Soko Hub'})
+
+
+def verify_otp(request):
+    """Verifies the 5-digit OTP and finalizes user login."""
+    email = request.session.get('otp_email')
+    pending_user_id = request.session.get('pending_user_id')
+    
+    if not email and not pending_user_id:
+        return redirect('login')
+
+    if request.method == "POST":
+        otp_input = request.POST.get('otp')
+        from .models import EmailOTP
+        
+        # Verify the most recent valid OTP for this email
+        otp_obj = EmailOTP.objects.filter(email=email).last()
+        
+        if otp_obj and otp_obj.otp == otp_input and otp_obj.is_valid():
+            # If we had a pending password login, get that user
+            if pending_user_id:
+                user = User.objects.get(id=pending_user_id)
+            else:
+                # Flow from direct email-only login (if supported)
+                user = User.objects.get(email=email)
+                
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            
+            # Cleanup session
+            if 'pending_user_id' in request.session:
+                del request.session['pending_user_id']
+            if 'otp_email' in request.session:
+                del request.session['otp_email']
+                
+            messages.success(request, "Login successful!")
+            
+            if user.is_vendor():
+                return redirect('vendor_dashboard')
+            return redirect('home')
+        else:
+            messages.error(request, "Invalid or expired verification code.")
+    
+    return render(request, 'accounts/verify_otp.html', {
+        'title': 'Verify Login - Soko Hub',
+        'email': email
     })

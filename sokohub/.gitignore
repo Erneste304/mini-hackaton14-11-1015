@@ -7,6 +7,7 @@ media/
 
 # Environment variables
 .env
+test_email.py
 
 # Python
 __pycache__/
