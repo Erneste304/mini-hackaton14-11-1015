@@ -2,6 +2,7 @@ import random
 import string
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm, UserProfileForm
@@ -76,7 +77,13 @@ def login_view(request):
             from django.conf import settings
             
             subject = "Your Soko Hub Login Verification"
-            message = f"Hello {user.username},\n\nYour 5-digit verification code is: {otp_code}\n\nThis code will expire in 3 minutes."
+            
+            # Generate Direct Link
+            verify_url = request.build_absolute_uri(
+                reverse('verify_otp_direct') + f'?email={user.email}&otp={otp_code}'
+            )
+            
+            message = f"Hello {user.username},\n\nYour 5-digit verification code is: {otp_code}\n\nAlternatively, you can click the link below to verify and login automatically:\n{verify_url}\n\nThis code will expire in 3 minutes."
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
             # Defer login: store user ID and email in session
@@ -219,3 +226,40 @@ def verify_otp(request):
         'title': 'Verify Login - Soko Hub',
         'email': email
     })
+
+
+def verify_otp_direct(request):
+    """Verifies the OTP directly from a link and finalizes login."""
+    email = request.GET.get('email')
+    otp = request.GET.get('otp')
+    
+    if not email or not otp:
+        messages.error(request, "Invalid verification link.")
+        return redirect('login')
+        
+    from .models import EmailOTP
+    # Verify the most recent valid OTP for this email
+    otp_obj = EmailOTP.objects.filter(email=email).last()
+    
+    if otp_obj and otp_obj.otp == otp and otp_obj.is_valid():
+        try:
+            user = User.objects.get(email=email)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            
+            # Cleanup session (if any)
+            if 'pending_user_id' in request.session:
+                del request.session['pending_user_id']
+            if 'otp_email' in request.session:
+                del request.session['otp_email']
+                
+            messages.success(request, "Login successful via direct link!")
+            
+            if user.is_vendor():
+                return redirect('vendor_dashboard')
+            return redirect('home')
+        except User.DoesNotExist:
+            messages.error(request, "User associated with this link does not exist.")
+            return redirect('login')
+    else:
+        messages.error(request, "The verification link is invalid or has expired.")
+        return redirect('login')

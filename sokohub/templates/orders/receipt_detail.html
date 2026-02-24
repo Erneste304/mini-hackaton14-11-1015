@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Receipt #{{ receipt.receipt_number }} - Soko Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-4 border-0">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="fw-bold text-primary mb-0">SOKO HUB</h2>
+                    <p class="text-muted mb-0">Marketplace & Compliance Portal</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h3 class="text-uppercase text-muted">Receipt</h3>
+                    <p class="mb-0"><strong>Number:</strong> {{ receipt.receipt_number }}</p>
+                    <p class="mb-0"><strong>Date:</strong> {{ receipt.issued_at|date:"M d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+        <hr class="my-0">
+        <div class="card-body p-5">
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <h6 class="text-uppercase text-muted fw-bold mb-3">From (Vendor):</h6>
+                    <h5 class="mb-1">{{ receipt.order.vendor.get_full_name|default:receipt.order.vendor.username }}</h5>
+                    <p class="text-muted mb-1">{{ receipt.order.vendor.location }}</p>
+                    <p class="text-muted mb-1">TIN: {{ receipt.order.vendor.tin_number|default:"N/A" }}</p>
+                    <p class="text-muted mb-0">Phone: {{ receipt.order.vendor.phone }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h6 class="text-uppercase text-muted fw-bold mb-3">To (Customer):</h6>
+                    <h5 class="mb-1">{{ receipt.order.customer.get_full_name|default:receipt.order.customer.username }}</h5>
+                    <p class="text-muted mb-1">{{ receipt.order.delivery_address }}</p>
+                    <p class="text-muted mb-0">Phone: {{ receipt.order.phone }}</p>
+                </div>
+            </div>
+
+            <div class="table-responsive mb-5">
+                <table class="table table-borderless">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3">Product Description</th>
+                            <th class="text-center py-3">Price</th>
+                            <th class="text-center py-3">Qty</th>
+                            <th class="text-md-end py-3">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in receipt.order.items.all %}
+                        <tr class="border-bottom">
+                            <td class="py-4">
+                                <h6 class="mb-1 fw-bold">{{ item.product.name }}</h6>
+                                <p class="text-muted small mb-0">{{ item.product.description|truncatewords:15 }}</p>
+                            </td>
+                            <td class="text-center py-4">${{ item.price|floatformat:2 }}</td>
+                            <td class="text-center py-4">{{ item.quantity }}</td>
+                            <td class="text-md-end py-4 fw-bold">${{ item.get_subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row justify-content-end">
+                <div class="col-md-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-bold">${{ receipt.order.total|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Tax (0%):</span>
+                        <span class="fw-bold">$0.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <h4 class="fw-bold">Total Payed:</h4>
+                        <h4 class="fw-bold text-success">${{ receipt.order.total|floatformat:2 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-light py-4 border-0">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted small mb-0">
+                        Thank you for shopping at Soko Hub. <br>
+                        This is an electronically generated receipt and is valid without signature.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button onclick="window.print()" class="btn btn-outline-primary d-print-none">
+                        <i class="fas fa-print me-2"></i>Print Receipt
+                    </button>
+                    <a href="{% url 'customer_orders' %}" class="btn btn-primary d-print-none ms-2">Back to Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .navbar, .footer, .d-print-none {
+            display: none !important;
+        }
+        .container {
+            width: 100% !important;
+            max-width: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+</style>
+{% endblock %}

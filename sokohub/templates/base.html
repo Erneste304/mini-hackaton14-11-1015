@@ -12,9 +12,60 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
   <style>
-    .navbar-brand {
+    :root {
+      --primary-color: #007bff;
+      --secondary-color: #6c757d;
+      --top-bar-bg: #f89d1c;
+      /* A festive orange for the promo bar */
+    }
+
+    .promo-bar {
+      background-color: var(--top-bar-bg);
+      color: white;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .promo-bar a {
+      color: white;
+      text-decoration: underline;
       font-weight: bold;
-      font-size: 1.5rem;
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.8rem;
+      color: var(--primary-color) !important;
+      letter-spacing: -1px;
+    }
+
+    .search-input {
+      border-radius: 20px 0 0 20px;
+      border-right: none;
+    }
+
+    .search-btn {
+      border-radius: 0 20px 20px 0;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .nav-link {
+      font-weight: 500;
+      color: #333 !important;
+    }
+
+    .nav-link:hover {
+      color: var(--primary-color) !important;
+    }
+
+    .navbar {
+      background-color: white !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      padding-top: 1rem;
+      padding-bottom: 1rem;
     }
 
     .product-card {
@@ -46,21 +97,48 @@
 </head>
 
 <body>
-  <!-- SINGLE NAVBAR - NO DUPLICATION -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+  <!-- Top Promotion Bar -->
+  <div class="promo-bar">
+    🎉 Free Delivery on Orders Over FRW 10,000 | <a href="{% url 'product_list' %}">Shop Now!</a>
+  </div>
+
+  <!-- Main Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
-      <!-- Single Soko Hub Logo -->
+      <!-- SokoHub Brand -->
       <a class="navbar-brand" href="{% url 'home' %}">
-        <i class="fas fa-store me-2"></i>Soko Hub
+        SokoHub
       </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <!-- Search Bar (Visible on larger screens) -->
+      <div class="d-none d-lg-block mx-lg-4 flex-grow-1">
+        <form action="{% url 'product_list' %}" method="GET" class="d-flex">
+          <input class="form-control search-input" type="search" name="search" placeholder="Search for products..."
+            aria-label="Search">
+          <button class="btn btn-primary search-btn" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+      </div>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
-        <!-- Left Navigation Menu -->
-        <ul class="navbar-nav me-auto">
+        <!-- Search Bar (Visible on mobile) -->
+        <div class="d-lg-none my-3">
+          <form action="{% url 'product_list' %}" method="GET" class="d-flex">
+            <input class="form-control search-input" type="search" name="search" placeholder="Search for products..."
+              aria-label="Search">
+            <button class="btn btn-primary search-btn" type="submit">
+              <i class="fas fa-search"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Navigation Links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <a class="nav-link" href="{% url 'home' %}">Home</a>
           </li>
@@ -74,90 +152,79 @@
             <a class="nav-link" href="{% url 'contact' %}">Contact</a>
           </li>
 
-          {% if user.is_authenticated %}
-          {% if user.is_vendor %}
+          {% if user.is_authenticated and user.is_vendor %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'vendor_dashboard' %}">Dashboard</a>
+            <a class="nav-link font-weight-bold text-primary" href="{% url 'vendor_dashboard' %}">Vendor Portal</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'vendor_products' %}">My Products</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'vendor_orders' %}">Orders</a>
-          </li>
-          {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'customer_orders' %}">My Orders</a>
-          </li>
-          {% endif %}
           {% endif %}
         </ul>
 
-        <!-- Right Navigation Menu - USER SECTION -->
-        <ul class="navbar-nav">
+        <!-- Right Side Icons/User -->
+        <ul class="navbar-nav ms-auto align-items-center">
           {% if user.is_authenticated %}
-
           <!-- Shopping Cart -->
-          {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link position-relative" href="{% url 'view_cart' %}" title="Shopping Cart">
-              <i class="fas fa-shopping-cart"></i>
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          <li class="nav-item me-3">
+            <a class="nav-link position-relative p-1" href="{% url 'view_cart' %}">
+              <i class="fas fa-shopping-bag fs-5"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                style="font-size: 0.6rem;">
                 {{ cart_count }}
               </span>
             </a>
           </li>
-          {% endif %}
-          <!-- After shopping cart, add notifications -->
 
-          {% if user.is_authenticated %}
-          <!-- Notifications for all users -->
+          <!-- Notifications -->
           {% include 'includes/notifications_dropdown.html' %}
-          {% endif %}
 
-          <!-- User Dropdown Menu -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              <i class="fas fa-user me-1"></i>
-              {{ user.username }}
-              {% if user.get_user_type_display %}
-              <small class="badge bg-light text-dark ms-1">
-                {{ user.get_user_type_display }}
-              </small>
-              {% endif %}
+          <!-- Language Switcher -->
+          <li class="nav-item dropdown ms-2">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="langDropdown" role="button"
+              data-bs-toggle="dropdown">
+              <i class="fas fa-globe me-1"></i>
+              <span class="text-uppercase">{{ LANGUAGE_CODE|slice:":2" }}</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
               <li>
-                <a class="dropdown-item" href="{% url 'profile' %}">
-                  <i class="fas fa-user-circle me-2"></i>My Profile
-                </a>
-              </li>
-
-              <!-- Role-specific Links -->
-              {% if user.is_vendor %}
-              <li>
-                <a class="dropdown-item" href="{% url 'vendor_dashboard' %}">
-                  <i class="fas fa-tachometer-alt me-2"></i>Vendor Dashboard
-                </a>
-              </li>
-              {% else %}
-              <li>
-                <a class="dropdown-item" href="{% url 'customer_orders' %}">
-                  <i class="fas fa-shopping-bag me-2"></i>My Orders
-                </a>
-              </li>
-              {% endif %}
-
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
-
-              <!-- Logout Form -->
-              <li>
-                <form method="post" action="{% url 'logout' %}" class="dropdown-logout-form">
+                <form action="{% url 'set_language' %}" method="post" class="p-0 m-0">
                   {% csrf_token %}
-                  <button type="submit" class="dropdown-logout-btn dropdown-item">
+                  <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                  <button name="language" value="en"
+                    class="dropdown-item d-flex justify-content-between align-items-center {% if LANGUAGE_CODE == 'en' %}active{% endif %}">English
+                    {% if LANGUAGE_CODE == 'en' %}<i class="fas fa-check small"></i>{% endif %}</button>
+                  <button name="language" value="rw"
+                    class="dropdown-item d-flex justify-content-between align-items-center {% if LANGUAGE_CODE == 'rw' %}active{% endif %}">Kinyarwanda
+                    {% if LANGUAGE_CODE == 'rw' %}<i class="fas fa-check small"></i>{% endif %}</button>
+                  <button name="language" value="fr"
+                    class="dropdown-item d-flex justify-content-between align-items-center {% if LANGUAGE_CODE == 'fr' %}active{% endif %}">French
+                    {% if LANGUAGE_CODE == 'fr' %}<i class="fas fa-check small"></i>{% endif %}</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+
+          <!-- User Menu -->
+          <li class="nav-item dropdown ms-2">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button"
+              data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle fs-5 me-1"></i>
+              <span>{{ user.username }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+              <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>Profile</a></li>
+              {% if user.is_vendor %}
+              <li><a class="dropdown-item" href="{% url 'vendor_dashboard' %}"><i
+                    class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+              {% else %}
+              <li><a class="dropdown-item" href="{% url 'customer_orders' %}"><i
+                    class="fas fa-shopping-bag me-2"></i>Orders</a></li>
+              {% endif %}
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
                     <i class="fas fa-sign-out-alt me-2"></i>Logout
                   </button>
                 </form>
@@ -165,16 +232,11 @@
             </ul>
           </li>
           {% else %}
-          <!-- Show when user is NOT logged in -->
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">
-              <i class="fas fa-sign-in-alt me-1"></i>Login
-            </a>
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}">
-              <i class="fas fa-user-plus me-1"></i>Register
-            </a>
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-primary rounded-pill px-4" href="{% url 'register' %}">Join Now</a>
           </li>
           {% endif %}
         </ul>

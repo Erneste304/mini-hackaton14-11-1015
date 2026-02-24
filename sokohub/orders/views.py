@@ -266,9 +266,15 @@ def approve_order(request, order_id):
         Notification.objects.create(
             user=order.customer,
             title="Order Approved",
-            message=f"Your order #{order.id} has been approved by the vendor.",
+            message=f"Your order #{order.id} has been approved by the vendor. You can now download your receipt.",
             notification_type='order_update'
         )
+
+        # Automatically generate Receipt
+        from django.utils.crypto import get_random_string
+        from .models import Receipt
+        receipt_no = f"REC-{order.id}-{get_random_string(5).upper()}"
+        Receipt.objects.get_or_create(order=order, defaults={'receipt_number': receipt_no})
         
         print(f"=== ORDER APPROVED ===")
         print(f"Order: #{order.id}")
@@ -340,6 +346,27 @@ def pay_order(request, order_id):
         messages.error(request, "This order is not in a payable state.")
         
     return redirect('order_detail', order_id=order.id)
+
+
+@customer_required
+def download_receipt(request, order_id):
+    """
+    View to display/download the receipt for an approved order
+    """
+    from .models import Receipt
+    order = get_object_or_404(Order, id=order_id, customer=request.user)
+    
+    if order.status not in ['approved', 'delivered', 'shipped']:
+        messages.error(request, "A receipt is not yet available for this order.")
+        return redirect('order_detail', order_id=order.id)
+        
+    receipt = get_object_or_404(Receipt, order=order)
+    
+    context = {
+        'receipt': receipt,
+        'title': f"Receipt {receipt.receipt_number}"
+    }
+    return render(request, 'orders/receipt_detail.html', context)
 
 @vendor_required
 def transaction_detail(request, order_id):

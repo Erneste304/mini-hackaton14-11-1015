@@ -7,7 +7,7 @@ class UserProfileForm(forms.ModelForm):
         model = User
         fields = [
             'first_name', 'last_name', 'email', 'phone', 
-            'address', 'city', 'country', 'profile_picture',
+            'address', 'city', 'country', 'tin_number', 'profile_picture',
             'email_notifications', 'sms_notifications'
         ]
         widgets = {
@@ -18,6 +18,7 @@ class UserProfileForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'city': forms.TextInput(attrs={'class': 'form-control'}),
             'country': forms.TextInput(attrs={'class': 'form-control'}),
+            'tin_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '9-digit TIN'}),
             'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
             'email_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'sms_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),

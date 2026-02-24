@@ -19,6 +19,7 @@ urlpatterns = [
     # OTP routes
     path('send-otp/', views.send_otp, name='send_otp'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('verify-otp-direct/', views.verify_otp_direct, name='verify_otp_direct'),
 
     # Password Reset routes (Django built-in, no migrations needed)
     path('password-reset/',

@@ -14,6 +14,7 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='customer')
     phone = models.CharField(max_length=15, blank=True)
     location = models.CharField(max_length=255, blank=True)
+    tin_number = models.CharField(max_length=9, blank=True, null=True, help_text="9-digit RRA TIN Number")
 
     # Enhanced profile fields
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)

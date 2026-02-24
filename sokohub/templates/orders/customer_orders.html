@@ -84,11 +84,16 @@
 
                     {% elif order.status == 'approved' %}
                     <!-- ✅ Approved -->
-                    <span class="badge bg-success py-2 px-3 me-2">
-                        <i class="fas fa-check-double me-1"></i> Approved by Vendor
-                    </span>
-                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">View
-                        Details</a>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success py-2 px-3 me-2">
+                            <i class="fas fa-check-double me-1"></i> Approved
+                        </span>
+                        <a href="{% url 'download_receipt' order.id %}" class="btn btn-sm btn-success me-2">
+                            <i class="fas fa-file-invoice me-1"></i> Download Facture
+                        </a>
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">View
+                            Details</a>
+                    </div>
 
                     {% elif order.status == 'cancelled' %}
                     <span class="badge bg-danger py-2 px-3">

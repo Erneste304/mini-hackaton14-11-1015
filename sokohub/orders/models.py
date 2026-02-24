@@ -128,3 +128,19 @@ class OrderItem(models.Model):
 
     def get_subtotal(self):
         return self.quantity * self.price
+
+
+class Receipt(models.Model):
+    order = models.OneToOneField(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='receipt'
+    )
+    receipt_number = models.CharField(max_length=50, unique=True)
+    issued_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Receipt {self.receipt_number} for Order #{self.order.id}"
+
+    class Meta:
+        ordering = ['-issued_at']

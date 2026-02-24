@@ -91,6 +91,14 @@
                             </div>
                         </div>
 
+                        {% if user.is_vendor %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ form.tin_number|as_crispy_field }}
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <!-- Notification Preferences -->
                         <div class="mb-4">
                             <h6 class="fw-bold mb-3">Notification Preferences</h6>

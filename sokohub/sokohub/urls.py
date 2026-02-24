@@ -14,6 +14,7 @@ urlpatterns = [
 
     # social auth
     path('accounts/', include('allauth.urls')),
+    path('i18n/', include('django.conf.urls.i18n')), # ✅ Added for language switching
     
     # Top-level logout fallback (safe to have)
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),

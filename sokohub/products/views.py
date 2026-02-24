@@ -131,7 +131,16 @@ def vendor_dashboard(request):
         'out_of_stock_products': out_of_stock_products.count(),
         'total_inventory_value': total_inventory_value,
         'recent_products': recent_products,
-        'title': 'Vendor Dashboard'
+        'title': 'Vendor Dashboard',
+        
+        # Simulated RRA Compliance Data
+        'rra_compliance': {
+            'has_tin': bool(request.user.tin_number),
+            'tin': request.user.tin_number,
+            'status': 'Compliant' if request.user.tin_number else 'Incomplete',
+            'penalty_alert': True if not request.user.tin_number else False,
+            'message': "Please add your TIN number to avoid RRA penalties." if not request.user.tin_number else "Your tax declarations are up to date."
+        }
     }
     return render(request, 'products/vendor_dashboard.html', context)
 
