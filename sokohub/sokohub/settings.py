@@ -17,9 +17,11 @@ AUTH_USER_MODEL = 'accounts.User'
 SECRET_KEY = 'django-insecure-j=n2(98a7x7y7jq@pfy(vpot27u!ql4kx2$t^)8g%kij5ky%4l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('RENDER') is None
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.render.com', 'localhost', '127.0.0.1']
+if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
+    ALLOWED_HOSTS.append(os.getenv('RENDER_EXTERNAL_HOSTNAME'))
 
 
 # Application definition
@@ -92,6 +94,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware', # ✅ Added for language switching
     'django.middleware.common.CommonMiddleware',
@@ -182,6 +185,16 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
     ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise storage to compress and cache static files
+STORAGES = {
+    "default": {
+        "ENGINE": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "ENGINE": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
