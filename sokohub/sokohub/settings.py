@@ -50,7 +50,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.EmailOrUsernameModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 

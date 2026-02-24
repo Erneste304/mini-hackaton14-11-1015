@@ -1,11 +1,13 @@
 import random
 import string
+import sys
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm, UserProfileForm
+from django.db.models import Q
 from .models import User
 from .decorators import vendor_required, customer_required
 
@@ -53,47 +55,87 @@ def login_view(request):
         return redirect('product_list')
 
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        sys.stderr.write("DEBUG: Received POST request for login\n")
+        # Ensure a clean session for this new login attempt
+        if 'pending_user_id' in request.session: del request.session['pending_user_id']
+        if 'otp_email' in request.session: del request.session['otp_email']
 
-        # Normal authentication
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        sys.stderr.write(f"DEBUG: Login application attempt for: {username}\n")
+
+        # Authenticate using the custom backend (supports both username and email)
         user = auth_authenticate(request, username=username, password=password)
+        sys.stderr.write(f"DEBUG: Authentication result: {user}\n")
+
+        print(f"DEBUG: Checking if user is None: {user is None}")
         if user is None:
-            # check if they used email
+            print("DEBUG: User is None, checking for social account...")
+            # Check if it might be a social account with no usable password
             try:
-                user_obj = User.objects.get(email=username)
-                user = auth_authenticate(request, username=user_obj.username, password=password)
-            except User.DoesNotExist:
+                user_obj = User.objects.get(Q(username__iexact=username) | Q(email__iexact=username))
+                print(f"DEBUG: Found user_obj for social check: {user_obj}")
+                if not user_obj.has_usable_password():
+                    print("DEBUG: User has no usable password (social account)")
+                    messages.error(
+                        request,
+                        'This account was created via Google. Please use "Continue with Google" to sign in, '
+                        'or use "Login with Email OTP" below.'
+                    )
+                    context = {'title': 'Login - Soko Hub'}
+                    return render(request, 'accounts/login.html', context)
+            except (User.DoesNotExist, User.MultipleObjectsReturned) as e:
+                sys.stderr.write(f"DEBUG: Social check exception: {e}\n")
                 pass
 
+        sys.stderr.write(f"DEBUG: Final user check before redirect/error: {user}\n")
         if user is not None:
+            sys.stderr.write(f"DEBUG: User is not None, is_active: {user.is_active}\n")
+            if not user.is_active:
+                messages.error(request, 'Your account has been disabled. Please contact support.')
+                context = {'title': 'Login - Soko Hub'}
+                return render(request, 'accounts/login.html', context)
+
             # Generate and send 5-digit OTP
+            sys.stderr.write("DEBUG: Generating OTP...\n")
             otp_code = ''.join(random.choices(string.digits, k=5))
             from .models import EmailOTP
             EmailOTP.objects.create(email=user.email, otp=otp_code)
 
-            # Send Email
+            # Send Email with direct login link
             from django.core.mail import send_mail
             from django.conf import settings
-            
-            subject = "Your Soko Hub Login Verification"
-            
-            # Generate Direct Link
-            verify_url = request.build_absolute_uri(
-                reverse('verify_otp_direct') + f'?email={user.email}&otp={otp_code}'
-            )
-            
-            message = f"Hello {user.username},\n\nYour 5-digit verification code is: {otp_code}\n\nAlternatively, you can click the link below to verify and login automatically:\n{verify_url}\n\nThis code will expire in 3 minutes."
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
-            # Defer login: store user ID and email in session
+            sys.stderr.write(f"DEBUG: Sending OTP to {user.email}\n")
+            subject = "Your Soko Hub Login Verification"
+            verify_url = request.build_absolute_uri(
+                reverse('verify_otp_direct')
+            ) + f'?email={user.email}&otp={otp_code}'
+
+            message = (
+                f"Hello {user.username},\n\n"
+                f"Your 5-digit verification code is: {otp_code}\n\n"
+                f"Alternatively, you can click the link below to verify and login automatically:\n"
+                f"{verify_url}\n\n"
+                f"This code will expire in 3 minutes."
+            )
+            try:
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+                print("DEBUG: Email sent successfully")
+            except Exception as e:
+                print(f"DEBUG: Email sending failed: {e}")
+
+            # Defer full login until OTP is verified
             request.session['pending_user_id'] = user.id
             request.session['otp_email'] = user.email
-            
-            messages.success(request, f"A 5-digit verification code has been sent to {user.email}.")
+
+            messages.success(request, f"A verification code has been sent to {user.email}.")
             return redirect('verify_otp')
         else:
-            messages.error(request, 'Invalid username or password. Please try again.')
+            sys.stderr.write("DEBUG: Authentication failed, adding error message\n")
+            messages.error(request, 'Invalid username/email or password. Please try again.')
+            context = {'title': 'Login Failed Credentials - Soko Hub'}
+            return render(request, 'accounts/login.html', context)
 
     context = {'title': 'Login - Soko Hub'}
     return render(request, 'accounts/login.html', context)
@@ -151,6 +193,9 @@ def all_notifications(request):
 def send_otp(request):
     """Generates and sends a 5-digit OTP to the user's email."""
     if request.method == "POST":
+        # Ensure a fresh state for OTP request
+        if 'pending_user_id' in request.session: del request.session['pending_user_id']
+        
         email = request.POST.get('email')
         if not email:
             messages.error(request, "Email is required.")
@@ -199,14 +244,22 @@ def verify_otp(request):
         otp_obj = EmailOTP.objects.filter(email=email).last()
         
         if otp_obj and otp_obj.otp == otp_input and otp_obj.is_valid():
-            # If we had a pending password login, get that user
-            if pending_user_id:
-                user = User.objects.get(id=pending_user_id)
-            else:
-                # Flow from direct email-only login (if supported)
-                user = User.objects.get(email=email)
+            try:
+                # If we had a pending password login, get that user
+                if pending_user_id:
+                    user = User.objects.get(id=pending_user_id)
+                    # Safety check: ensure the email still matches the OTP email (case-insensitive)
+                    if user.email.lower() != email.lower():
+                        messages.error(request, "Session inconsistency. Please try logging in again.")
+                        return redirect('login')
+                else:
+                    # Flow from direct email-only login (if supported)
+                    user = User.objects.get(email__iexact=email)
+            except User.DoesNotExist:
+                messages.error(request, "Account not found. Please try logging in again.")
+                return redirect('login')
                 
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend='accounts.backends.EmailOrUsernameModelBackend')
             
             # Cleanup session
             if 'pending_user_id' in request.session:
@@ -243,8 +296,8 @@ def verify_otp_direct(request):
     
     if otp_obj and otp_obj.otp == otp and otp_obj.is_valid():
         try:
-            user = User.objects.get(email=email)
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            user = User.objects.get(email__iexact=email)
+            login(request, user, backend='accounts.backends.EmailOrUsernameModelBackend')
             
             # Cleanup session (if any)
             if 'pending_user_id' in request.session:
