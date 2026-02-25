@@ -267,12 +267,11 @@
                 </div>
                 {% endif %}
 
-                {% if card and is_promotion %}
-                <div class="d-flex justify-content-between mb-2 text-success font-weight-bold">
+                <div id="discount-row" class="justify-content-between mb-2 text-success font-weight-bold"
+                    style="display: {% if card and is_promotion and default_method == 'virtual_card' %}flex{% else %}none{% endif %};">
                     <span>Sokohub Card Discount (5%):</span>
                     <span id="discount-display">-${{ discount_amount }}</span>
                 </div>
-                {% endif %}
                 <hr>
                 <div class="d-flex justify-content-between">
                     <strong class="fs-5">Total:</strong>
@@ -304,7 +303,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const quantityInput = document.getElementById('id_quantity');
         const unitPrice = parseFloat("{{ unit_price|default:total|default:0 }}");
-        const hasDiscount = "{{ card }}" !== "None" && "{{ is_promotion }}" === "True";
+        const isEligibleForPromotion = "{{ card }}" !== "None" && "{{ is_promotion }}" === "True";
         const discountRate = 0.05;
         const maxStock = parseInt("{{ product.stock|default:999 }}");
 
@@ -312,16 +311,25 @@
             if (!quantityInput) return;
             const quantity = parseInt(quantityInput.value) || 1;
             const subtotal = unitPrice * quantity;
+
+            // Only apply discount if Virtual Card is selected AND user is eligible
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+            const useDiscount = isEligibleForPromotion && selectedMethod === 'virtual_card';
+
             let total = subtotal;
             let discount = 0;
 
-            if (hasDiscount) {
+            const discountRow = document.getElementById('discount-row');
+            if (useDiscount) {
                 discount = subtotal * discountRate;
                 total = subtotal - discount;
                 const discountDisplay = document.getElementById('discount-display');
                 if (discountDisplay) {
                     discountDisplay.textContent = '-$' + discount.toFixed(2);
                 }
+                if (discountRow) discountRow.style.display = 'flex';
+            } else {
+                if (discountRow) discountRow.style.display = 'none';
             }
 
             // Update display totals
@@ -349,15 +357,28 @@
         if (quantityInput) {
             quantityInput.addEventListener('input', updateTotals);
             quantityInput.addEventListener('change', updateTotals);
-            // Initial update
-            updateTotals();
         }
+
+        // Add change listeners to all radios
+        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+            radio.addEventListener('change', updateTotals);
+        });
+
+        // Initial update
+        updateTotals();
+
+        // Export updateTotals for manual trigger
+        window.triggerUpdateTotals = updateTotals;
     });
 
     // Handle payment option clicks
     function selectPayment(element, radioId) {
         const radio = document.getElementById(radioId);
-        if (radio) radio.checked = true;
+        if (radio) {
+            radio.checked = true;
+            // Trigger the change event manually since setting checked doesn't fire it
+            radio.dispatchEvent(new Event('change'));
+        }
 
         // Remove active class from all options
         document.querySelectorAll('.payment-option').forEach(opt => {
