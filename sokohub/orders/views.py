@@ -267,7 +267,8 @@ def approve_order(request, order_id):
             user=order.customer,
             title="Order Approved",
             message=f"Your order #{order.id} has been approved by the vendor. You can now download your receipt.",
-            notification_type='order_update'
+            notification_type='order_update',
+            target_url=reverse('order_detail', kwargs={'order_id': order.id})
         )
 
         # Automatically generate Receipt
@@ -311,7 +312,8 @@ def cancel_order(request, order_id):
             user=order.customer,
             title="Order Cancelled",
             message=f"Your order #{order.id} has been cancelled by the vendor.",
-            notification_type='order_update'
+            notification_type='order_update',
+            target_url=reverse('order_detail', kwargs={'order_id': order.id})
         )
     else:
         messages.error(request, "This order cannot be cancelled.")
