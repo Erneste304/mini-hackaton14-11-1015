@@ -18,40 +18,71 @@
 
 <!-- Features Section (sokohub.shop style) -->
 <div class="row g-4 py-5 border-bottom">
-    <div class="col-md-3 d-flex align-items-center">
-        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
-            <i class="fas fa-truck"></i>
-        </div>
-        <div>
-            <h6 class="fw-bold mb-0">Free Delivery</h6>
-            <small class="text-muted">On orders over KSh 5,000</small>
-        </div>
-    </div>
-    <div class="col-md-3 d-flex align-items-center">
-        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
-            <i class="fas fa-shield-alt"></i>
-        </div>
-        <div>
-            <h6 class="fw-bold mb-0">Secure Payment</h6>
-            <small class="text-muted">M-Pesa & Card accepted</small>
+    <div class="col-md-3">
+        <div class="feature-item d-flex align-items-center p-2 rounded-3" data-bs-toggle="modal" data-bs-target="#featureModal" 
+             data-title="Free Delivery" data-content="Get your products delivered at no extra cost when you spend more than FRW 5,000. We ensure your items reach you safely and on time.">
+            <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0">Free Delivery</h6>
+                <small class="text-muted">On orders over FRW 5,000</small>
+            </div>
         </div>
     </div>
-    <div class="col-md-3 d-flex align-items-center">
-        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
-            <i class="fas fa-bolt"></i>
-        </div>
-        <div>
-            <h6 class="fw-bold mb-0">Fast Shipping</h6>
-            <small class="text-muted">Same day delivery in Kigali</small>
+    <div class="col-md-3">
+        <div class="feature-item d-flex align-items-center p-2 rounded-3" data-bs-toggle="modal" data-bs-target="#featureModal"
+             data-title="Secure Payment" data-content="Worry-free transactions with integrated M-Pesa and card payments. Your financial safety is our priority with encrypted payment gateways.">
+            <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0">Secure Payment</h6>
+                <small class="text-muted">M-Pesa & Card accepted</small>
+            </div>
         </div>
     </div>
-    <div class="col-md-3 d-flex align-items-center">
-        <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
-            <i class="fas fa-check-circle"></i>
+    <div class="col-md-3">
+        <div class="feature-item d-flex align-items-center p-2 rounded-3" data-bs-toggle="modal" data-bs-target="#featureModal"
+             data-title="Fast Shipping" data-content="Need it now? We offer same-day delivery for orders within Kigali and express shipping nationwide for all other locations.">
+            <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0">Fast Shipping</h6>
+                <small class="text-muted">Same day delivery in Kigali</small>
+            </div>
         </div>
-        <div>
-            <h6 class="fw-bold mb-0">Quality Products</h6>
-            <small class="text-muted">Verified vendors only</small>
+    </div>
+    <div class="col-md-3">
+        <div class="feature-item d-flex align-items-center p-2 rounded-3" data-bs-toggle="modal" data-bs-target="#featureModal"
+             data-title="Quality Products" data-content="Shop with confidence. Every vendor on Soko Hub is strictly verified to ensure you get only the best, authentic products.">
+            <div class="feature-icon bg-primary bg-gradient p-3 rounded-3 me-3 text-white">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0">Quality Products</h6>
+                <small class="text-muted">Verified vendors only</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Service Blocks Modal -->
+<div class="modal fade" id="featureModal" tabindex="-1" aria-labelledby="featureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="featureModalLabel">Service Detail</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div id="modal-feature-icon" class="display-4 text-primary mb-3"></div>
+                <p id="modal-feature-content" class="fs-5 text-muted"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-primary px-5 rounded-pill" data-bs-dismiss="modal">Got it!</button>
+            </div>
         </div>
     </div>
 </div>
@@ -158,13 +189,37 @@
 </div>
 
 <style>
-    .category-card {
+    .category-card, .feature-item {
         transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
     }
 
-    .category-card:hover {
+    .category-card:hover, .feature-item:hover {
         transform: translateY(-5px);
         box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        background-color: #f8f9fa;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const featureModal = document.getElementById('featureModal');
+        if (featureModal) {
+            featureModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const title = button.getAttribute('data-title');
+                const content = button.getAttribute('data-content');
+                const iconHtml = button.querySelector('.feature-icon').innerHTML;
+
+                const modalTitle = featureModal.querySelector('.modal-title');
+                const modalBodyContent = featureModal.querySelector('#modal-feature-content');
+                const modalIcon = featureModal.querySelector('#modal-feature-icon');
+
+                modalTitle.textContent = title;
+                modalBodyContent.textContent = content;
+                modalIcon.innerHTML = iconHtml;
+            });
+        }
+    });
+</script>
 {% endblock %}
