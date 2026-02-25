@@ -111,14 +111,15 @@
                             <div class="card-body p-0">
                                 <div class="payment-options">
                                     {% for value, name in form.fields.payment_method.choices %}
-                                    <div class="payment-option p-3 border-bottom {% if value == default_method %}bg-white border-primary shadow-sm{% endif %}"
+                                    {% if value == default_method %}
+                                    <!-- SELECTED OPTION -->
+                                    <div class="payment-option p-3 border-bottom bg-white border-primary shadow-sm"
                                         style="transition: all 0.2s; cursor: pointer;"
                                         onclick="selectPayment(this, 'id_payment_method_{{ forloop.counter0 }}')">
                                         <div class="form-check d-flex align-items-center w-100">
                                             <input class="form-check-input" type="radio" name="payment_method"
-                                                id="id_payment_method_{{ forloop.counter0 }}" value="{{ value }}" {% if
-                                                value==default_method %}checked{% endif %} required>
-
+                                                id="id_payment_method_{{ forloop.counter0 }}" value="{{ value }}"
+                                                checked required>
                                             <label
                                                 class="form-check-label w-100 ms-3 d-flex justify-content-between align-items-center"
                                                 for="id_payment_method_{{ forloop.counter0 }}">
@@ -133,13 +134,11 @@
                                                         balance</small>
                                                     {% endif %}
                                                 </div>
-
                                                 {% if value == 'virtual_card' and card %}
                                                 <div class="text-end">
                                                     <span class="badge bg-primary">Recommended</span>
                                                 </div>
                                                 {% endif %}
-
                                                 <div class="ms-3 fs-4 text-secondary">
                                                     {% if value == 'mtn' %}<i class="fas fa-mobile-alt"></i>
                                                     {% elif value == 'tigo' %}<i class="fas fa-mobile-alt"></i>
@@ -150,6 +149,45 @@
                                             </label>
                                         </div>
                                     </div>
+                                    {% else %}
+                                    <!-- UNSELECTED OPTION -->
+                                    <div class="payment-option p-3 border-bottom"
+                                        style="transition: all 0.2s; cursor: pointer;"
+                                        onclick="selectPayment(this, 'id_payment_method_{{ forloop.counter0 }}')">
+                                        <div class="form-check d-flex align-items-center w-100">
+                                            <input class="form-check-input" type="radio" name="payment_method"
+                                                id="id_payment_method_{{ forloop.counter0 }}" value="{{ value }}"
+                                                required>
+                                            <label
+                                                class="form-check-label w-100 ms-3 d-flex justify-content-between align-items-center"
+                                                for="id_payment_method_{{ forloop.counter0 }}">
+                                                <div>
+                                                    <span class="fw-bold d-block">{{ name }}</span>
+                                                    {% if value == 'mtn' %}
+                                                    <small class="text-muted">Pay with MTN Mobile Money</small>
+                                                    {% elif value == 'tigo' %}
+                                                    <small class="text-muted">Pay with Tigo Pesa</small>
+                                                    {% elif value == 'virtual_card' %}
+                                                    <small class="text-muted">Pay with your Sokohub membership
+                                                        balance</small>
+                                                    {% endif %}
+                                                </div>
+                                                {% if value == 'virtual_card' and card %}
+                                                <div class="text-end">
+                                                    <span class="badge bg-primary">Recommended</span>
+                                                </div>
+                                                {% endif %}
+                                                <div class="ms-3 fs-4 text-secondary">
+                                                    {% if value == 'mtn' %}<i class="fas fa-mobile-alt"></i>
+                                                    {% elif value == 'tigo' %}<i class="fas fa-mobile-alt"></i>
+                                                    {% elif value == 'virtual_card' %}<i
+                                                        class="fas fa-credit-card text-primary"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>
@@ -318,7 +356,9 @@
 
     // Handle payment option clicks
     function selectPayment(element, radioId) {
-        document.getElementById(radioId).checked = true;
+        const radio = document.getElementById(radioId);
+        if (radio) radio.checked = true;
+
         // Remove active class from all options
         document.querySelectorAll('.payment-option').forEach(opt => {
             opt.classList.remove('bg-white', 'border-primary', 'shadow-sm');
