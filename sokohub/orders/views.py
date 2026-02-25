@@ -149,8 +149,6 @@ def checkout_cart(request):
 
     # Calculate default payment method
     default_method = form['payment_method'].value()
-    if not default_method and card:
-        default_method = 'virtual_card'
 
     context = {
         'cart': cart,
@@ -284,8 +282,6 @@ def checkout(request, product_id):
 
     # Calculate default payment method
     default_method = form['payment_method'].value()
-    if not default_method and card:
-        default_method = 'virtual_card'
 
     context = {
         'product': product,
@@ -295,6 +291,7 @@ def checkout(request, product_id):
         'is_promotion': is_promotion,
         'card': card,
         'unit_price': unit_price,
+        'total': unit_price,
         'discount_amount': discount_amount,
         'discounted_unit_price': discounted_unit_price,
         'default_method': default_method
