@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h2 class="mb-0 font-weight-bold">Get Your Sokohub Card</h2>
+                    <p class="mb-0 text-white-50">Enjoy 5% discount on all products on Promotion Days!</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-id-card fa-4x text-primary"></i>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group mb-4">
+                                <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            By requesting this card, you agree to our terms of service. Promotion days occur 5 times per month.
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg shadow-sm mt-4">
+                            Request Card & Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

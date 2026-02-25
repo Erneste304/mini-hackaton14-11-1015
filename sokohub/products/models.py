@@ -121,3 +121,17 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.product.name}"
+
+
+class PromotionDay(models.Model):
+    date = models.DateField(unique=True)
+    description = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Promotion Day: {self.date} ({self.description})"
+
+    class Meta:
+        ordering = ['-date']
+        verbose_name = "Promotion Day"
+        verbose_name_plural = "Promotion Days"

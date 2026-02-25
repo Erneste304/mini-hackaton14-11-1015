@@ -1,5 +1,11 @@
 from django.contrib import admin
-from .models import Product, Category
+from .models import Product, Category, PromotionDay
+
+@admin.register(PromotionDay)
+class PromotionDayAdmin(admin.ModelAdmin):
+    list_display = ('date', 'description', 'created_at')
+    list_filter = ('date',)
+    search_fields = ('description',)
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

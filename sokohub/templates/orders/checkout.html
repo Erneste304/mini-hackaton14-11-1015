@@ -98,15 +98,69 @@
 
                     <!-- Payment Information -->
                     <div class="mb-4">
-                        <h5 class="mb-3">Payment Method</h5>
-                        <div class="card border-0 bg-light">
-                            <div class="card-body">
-                                {{ form.payment_method|as_crispy_field }}
-                                <div class="mt-2 small text-muted">
-                                    <i class="fas fa-info-circle me-1"></i> You will be able to complete the payment on
-                                    the next screen.
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Payment Method</h5>
+                            {% if card %}
+                            <span class="badge badge-pill bg-success p-2 px-3 shadow-sm">
+                                <i class="fas fa-wallet mr-1"></i> Card Balance: ${{ card.balance }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="card border-0 bg-light shadow-sm overflow-hidden" style="border-radius: 12px;">
+                            <div class="card-body p-0">
+                                <div class="payment-options">
+                                    {% for value, name in form.fields.payment_method.choices %}
+                                    <div class="payment-option p-3 border-bottom {% if value == default_method %}bg-white border-primary shadow-sm{% endif %}"
+                                        style="transition: all 0.2s; cursor: pointer;"
+                                        onclick="selectPayment(this, 'id_payment_method_{{ forloop.counter0 }}')">
+                                        <div class="form-check d-flex align-items-center w-100">
+                                            <input class="form-check-input" type="radio" name="payment_method"
+                                                id="id_payment_method_{{ forloop.counter0 }}" value="{{ value }}" {% if
+                                                value==default_method %}checked{% endif %} required>
+
+                                            <label
+                                                class="form-check-label w-100 ms-3 d-flex justify-content-between align-items-center"
+                                                for="id_payment_method_{{ forloop.counter0 }}">
+                                                <div>
+                                                    <span class="fw-bold d-block">{{ name }}</span>
+                                                    {% if value == 'mtn' %}
+                                                    <small class="text-muted">Pay with MTN Mobile Money</small>
+                                                    {% elif value == 'tigo' %}
+                                                    <small class="text-muted">Pay with Tigo Pesa</small>
+                                                    {% elif value == 'virtual_card' %}
+                                                    <small class="text-muted">Pay with your Sokohub membership
+                                                        balance</small>
+                                                    {% endif %}
+                                                </div>
+
+                                                {% if value == 'virtual_card' and card %}
+                                                <div class="text-end">
+                                                    <span class="badge bg-primary">Recommended</span>
+                                                </div>
+                                                {% endif %}
+
+                                                <div class="ms-3 fs-4 text-secondary">
+                                                    {% if value == 'mtn' %}<i class="fas fa-mobile-alt"></i>
+                                                    {% elif value == 'tigo' %}<i class="fas fa-mobile-alt"></i>
+                                                    {% elif value == 'virtual_card' %}<i
+                                                        class="fas fa-credit-card text-primary"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
                                 </div>
                             </div>
+                        </div>
+                        <div class="mt-2 small text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            {% if card %}
+                            Selecting **Virtual Card** will deduct from your card balance instantly.
+                            {% else %}
+                            You will be redirected to complete the payment on the next screen.
+                            {% endif %}
                         </div>
                     </div>
 
@@ -158,7 +212,7 @@
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Subtotal:</span>
-                    <span>${{ cart.get_total_price }}</span>
+                    <span>${{ total }}</span>
                 </div>
                 {% else %}
                 <div class="d-flex justify-content-between mb-2">
@@ -167,22 +221,25 @@
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Unit Price:</span>
-                    <span>${{ product.price }}</span>
+                    <span>${{ unit_price }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Quantity:</span>
                     <span id="review-quantity">1</span>
                 </div>
                 {% endif %}
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Shipping:</span>
-                    <span class="text-success">FREE</span>
+
+                {% if card and is_promotion %}
+                <div class="d-flex justify-content-between mb-2 text-success font-weight-bold">
+                    <span>Sokohub Card Discount (5%):</span>
+                    <span id="discount-display">-${{ discount_amount }}</span>
                 </div>
+                {% endif %}
                 <hr>
                 <div class="d-flex justify-content-between">
                     <strong class="fs-5">Total:</strong>
                     <strong class="fs-5 text-primary" id="review-total">
-                        {% if is_cart_checkout %}${{ cart.get_total_price }}{% else %}${{ product.price }}{% endif %}
+                        ${{ discounted_total|default:discounted_unit_price }}
                     </strong>
                 </div>
             </div>
@@ -205,39 +262,83 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if not is_cart_checkout %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const quantityInput = document.getElementById('id_quantity');
-        const price = {{ product.price }
-    };
-    const maxStock = {{ product.stock }};
+        const unitPrice = parseFloat("{{ unit_price|default:total|default:0 }}");
+        const hasDiscount = "{{ card }}" !== "None" && "{{ is_promotion }}" === "True";
+        const discountRate = 0.05;
+        const maxStock = parseInt("{{ product.stock|default:999 }}");
 
-    function updateTotals() {
-        const quantity = parseInt(quantityInput.value) || 1;
-        const total = price * quantity;
+        function updateTotals() {
+            if (!quantityInput) return;
+            const quantity = parseInt(quantityInput.value) || 1;
+            const subtotal = unitPrice * quantity;
+            let total = subtotal;
+            let discount = 0;
 
-        // Update display totals
-        document.getElementById('order-total').textContent = '$' + total.toFixed(2);
-        document.getElementById('review-total').textContent = '$' + total.toFixed(2);
-        document.getElementById('review-quantity').textContent = quantity;
+            if (hasDiscount) {
+                discount = subtotal * discountRate;
+                total = subtotal - discount;
+                const discountDisplay = document.getElementById('discount-display');
+                if (discountDisplay) {
+                    discountDisplay.textContent = '-$' + discount.toFixed(2);
+                }
+            }
 
-        // Validate stock
-        if (quantity > maxStock) {
-            quantityInput.setCustomValidity(`Only ${maxStock} items available`);
-            document.getElementById('place-order-btn').disabled = true;
-        } else {
-            quantityInput.setCustomValidity('');
-            document.getElementById('place-order-btn').disabled = false;
+            // Update display totals
+            const orderTotalDisplay = document.getElementById('order-total');
+            const reviewTotalDisplay = document.getElementById('review-total');
+            const reviewQuantityDisplay = document.getElementById('review-quantity');
+
+            if (orderTotalDisplay) orderTotalDisplay.textContent = '$' + total.toFixed(2);
+            if (reviewTotalDisplay) reviewTotalDisplay.textContent = '$' + total.toFixed(2);
+            if (reviewQuantityDisplay) reviewQuantityDisplay.textContent = quantity;
+
+            // Validate stock
+            const placeOrderBtn = document.getElementById('place-order-btn');
+            if (placeOrderBtn) {
+                if (quantity > maxStock) {
+                    quantityInput.setCustomValidity(`Only ${maxStock} items available`);
+                    placeOrderBtn.disabled = true;
+                } else {
+                    quantityInput.setCustomValidity('');
+                    placeOrderBtn.disabled = false;
+                }
+            }
         }
+
+        if (quantityInput) {
+            quantityInput.addEventListener('input', updateTotals);
+            quantityInput.addEventListener('change', updateTotals);
+            // Initial update
+            updateTotals();
+        }
+    });
+
+    // Handle payment option clicks
+    function selectPayment(element, radioId) {
+        document.getElementById(radioId).checked = true;
+        // Remove active class from all options
+        document.querySelectorAll('.payment-option').forEach(opt => {
+            opt.classList.remove('bg-white', 'border-primary', 'shadow-sm');
+        });
+        // Add active class to clicked option
+        element.classList.add('bg-white', 'border-primary', 'shadow-sm');
+    }
+</script>
+
+<style>
+    .payment-option:hover {
+        background-color: #f8f9fa;
     }
 
-    quantityInput.addEventListener('input', updateTotals);
-    quantityInput.addEventListener('change', updateTotals);
-
-    // Initial update
-    updateTotals();
-    });
-</script>
-{% endif %}
+    .payment-option.border-primary {
+        border-width: 2px !important;
+        margin-top: -1px;
+        margin-bottom: -1px;
+        position: relative;
+        z-index: 1;
+    }
+</style>
 {% endblock %}

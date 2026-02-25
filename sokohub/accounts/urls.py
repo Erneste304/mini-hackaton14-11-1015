@@ -52,4 +52,10 @@ urlpatterns = [
 
     # Notification path
     path('notifications/', views.all_notifications, name='all_notifications'),
+
+    # Sokohub Card routes
+    path('request-card/', views.request_sokohub_card, name='request_sokohub_card'),
+    path('pay-card/', views.pay_sokohub_card, name='pay_sokohub_card'),
+    path('card-details/', views.sokohub_card_details, name='sokohub_card_details'),
+    path('top-up-card/', views.top_up_card, name='top_up_card'),
 ]

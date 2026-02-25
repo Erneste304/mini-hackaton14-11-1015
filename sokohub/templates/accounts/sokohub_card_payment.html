@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <h2 class="mb-0 font-weight-bold">Sokohub Card Payment</h2>
+                    <p class="mb-0 text-white-50">Complete your payment to activate your card</p>
+                </div>
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <div class="display-3 text-success font-weight-bold">$10.00</div>
+                        <p class="text-muted">Lifetime Membership Fee</p>
+                    </div>
+
+                    <div class="card bg-light border-0 mb-4 text-left">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-user-circle mr-2"></i> Account Details</h5>
+                            <p class="card-text mb-1"><strong>Name:</strong> {{
+                                request.user.get_full_name|default:request.user.username }}</p>
+                            <p class="card-text mb-1"><strong>Email:</strong> {{ card.email }}</p>
+                            <p class="card-text mb-0"><strong>Phone:</strong> {{ card.phone }}</p>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="alert alert-warning text-left mb-4">
+                            <p class="mb-0 small"><i class="fas fa-exclamation-triangle mr-2"></i>
+                                <strong>Note:</strong> This is a simulated payment for the Hackathon demonstration.
+                                Clicking the button below will mark your card as paid and active in the system.</p>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block btn-lg shadow-sm">
+                            <i class="fas fa-check-circle mr-2"></i> Complete Payment & Activate
+                        </button>
+                    </form>
+
+                    <a href="{% url 'home' %}" class="btn btn-link mt-3 text-muted">Pay Later</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -5,11 +5,14 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponseForbidden, JsonResponse
 from accounts.decorators import customer_required, vendor_required
-from products.models import Product
+from products.models import Product, PromotionDay
 from cart.models import Cart
 from .models import Order, OrderItem
 from .forms import CheckoutForm
 from notifications.models import Notification
+from accounts.models import SokohubCard
+from django.utils import timezone
+from decimal import Decimal
 
 @customer_required
 def checkout_cart(request):
@@ -42,11 +45,41 @@ def checkout_cart(request):
                             messages.error(request, f'Sorry, only {item.product.stock} items of {item.product.name} available.')
                             return redirect('checkout_cart')
 
+                    # Calculate grand total for all vendors
+                    grand_total = Decimal('0.00')
+                    is_promotion = PromotionDay.objects.filter(date=timezone.now().date()).exists()
+                    has_card = SokohubCard.objects.filter(user=request.user, status='approved', is_active=True).exists()
+                    
+                    for vendor, v_items in vendor_items_map.items():
+                        v_total = sum(item.get_total_price() for item in v_items)
+                        if is_promotion and has_card:
+                            v_total = v_total * Decimal('0.95')
+                        grand_total += v_total
+
+                    # Handle Virtual Card payment deduction
+                    payment_method = form.cleaned_data['payment_method']
+                    if payment_method == 'virtual_card':
+                        if not has_card:
+                            messages.error(request, "You do not have a Sokohub Card to use this payment method.")
+                            return redirect('checkout_cart')
+                        
+                        user_card = SokohubCard.objects.get(user=request.user)
+                        if user_card.balance < grand_total:
+                            messages.error(request, f"Insufficient balance on your Sokohub Card. (Balance: ${user_card.balance})")
+                            return redirect('checkout_cart')
+                        
+                        # Deduct from balance
+                        user_card.balance -= grand_total
+                        user_card.save()
+
                     created_order_ids = []
                     for vendor, v_items in vendor_items_map.items():
                         # Calculate vendor subtotal
                         vendor_total = sum(item.get_total_price() for item in v_items)
                         
+                        if is_promotion and has_card:
+                            vendor_total = vendor_total * Decimal('0.95')
+
                         # Create order for this vendor
                         order = Order.objects.create(
                             customer=request.user,
@@ -54,8 +87,16 @@ def checkout_cart(request):
                             total=vendor_total,
                             delivery_address=form.cleaned_data['delivery_address'],
                             phone=form.cleaned_data['phone'],
-                            payment_method=form.cleaned_data['payment_method']
+                            payment_method=payment_method
                         )
+                        
+                        # If paid with virtual card, mark as paid immediately
+                        if payment_method == 'virtual_card':
+                            order.status = 'paid'
+                            order.payment_status = 'paid'
+                            order.transaction_id = f"VC-{order.id}-{user_card.virtual_id[-4:]}"
+                            order.save()
+
                         created_order_ids.append(str(order.id))
 
                         # Create order items and update stock
@@ -95,12 +136,34 @@ def checkout_cart(request):
         }
         form = CheckoutForm(initial=initial_data)
 
+    is_promotion = PromotionDay.objects.filter(date=timezone.now().date()).exists()
+    card = SokohubCard.objects.filter(user=request.user, status='approved', is_active=True).first()
+    
+    total = cart.get_total_price()
+    discount_amount = Decimal('0.00')
+    discounted_total = total
+    
+    if is_promotion and card:
+        discount_amount = total * Decimal('0.05')
+        discounted_total = total - discount_amount
+
+    # Calculate default payment method
+    default_method = form['payment_method'].value()
+    if not default_method and card:
+        default_method = 'virtual_card'
+
     context = {
         'cart': cart,
         'items': items,
         'form': form,
         'title': 'Cart Checkout',
-        'is_cart_checkout': True
+        'is_cart_checkout': True,
+        'is_promotion': is_promotion,
+        'card': card,
+        'total': total,
+        'discount_amount': discount_amount,
+        'discounted_total': discounted_total,
+        'default_method': default_method
     }
     return render(request, 'orders/checkout.html', context)
 
@@ -131,6 +194,29 @@ def checkout(request, product_id):
                     # Calculate total
                     total = product.price * quantity
 
+                    # Apply 5% discount for Sokohub Card holders on Promotion Days
+                    is_promotion = PromotionDay.objects.filter(date=timezone.now().date()).exists()
+                    has_card = SokohubCard.objects.filter(user=request.user, status='approved', is_active=True).exists()
+                    
+                    if is_promotion and has_card:
+                        total = total * Decimal('0.95')
+
+                    # Handle Virtual Card payment deduction
+                    payment_method = form.cleaned_data['payment_method']
+                    if payment_method == 'virtual_card':
+                        if not has_card:
+                            messages.error(request, "You do not have a Sokohub Card to use this payment method.")
+                            return redirect('checkout', product_id=product.id)
+                        
+                        user_card = SokohubCard.objects.get(user=request.user)
+                        if user_card.balance < total:
+                            messages.error(request, f"Insufficient balance on your Sokohub Card. (Balance: ${user_card.balance})")
+                            return redirect('checkout', product_id=product.id)
+                        
+                        # Deduct from balance
+                        user_card.balance -= total
+                        user_card.save()
+
                     # Create order
                     order = Order.objects.create(
                         customer=request.user,
@@ -138,8 +224,15 @@ def checkout(request, product_id):
                         total=total,
                         delivery_address=form.cleaned_data['delivery_address'],
                         phone=form.cleaned_data['phone'],
-                        payment_method=form.cleaned_data['payment_method']
+                        payment_method=payment_method
                     )
+                    
+                    # If paid with virtual card, mark as paid immediately
+                    if payment_method == 'virtual_card':
+                        order.status = 'paid'
+                        order.payment_status = 'paid'
+                        order.transaction_id = f"VC-{order.id}-{user_card.virtual_id[-4:]}"
+                        order.save()
 
                     # Create order item
                     OrderItem.objects.create(
@@ -177,11 +270,34 @@ def checkout(request, product_id):
         }
         form = CheckoutForm(initial=initial_data)
 
+    is_promotion = PromotionDay.objects.filter(date=timezone.now().date()).exists()
+    card = SokohubCard.objects.filter(user=request.user, status='approved', is_active=True).first()
+    
+    # We use initial quantity 1 for display
+    unit_price = product.price
+    discount_amount = Decimal('0.00')
+    discounted_unit_price = unit_price
+    
+    if is_promotion and card:
+        discount_amount = unit_price * Decimal('0.05')
+        discounted_unit_price = unit_price - discount_amount
+
+    # Calculate default payment method
+    default_method = form['payment_method'].value()
+    if not default_method and card:
+        default_method = 'virtual_card'
+
     context = {
         'product': product,
         'form': form,
         'title': 'Checkout',
-        'is_cart_checkout': False
+        'is_cart_checkout': False,
+        'is_promotion': is_promotion,
+        'card': card,
+        'unit_price': unit_price,
+        'discount_amount': discount_amount,
+        'discounted_unit_price': discounted_unit_price,
+        'default_method': default_method
     }
     return render(request, 'orders/checkout.html', context)
 
@@ -305,6 +421,24 @@ def cancel_order(request, order_id):
             for item in order.items.all():
                 item.product.stock += item.quantity
                 item.product.save()
+        
+        # REFUND: If paid with virtual card, add money back to card balance
+        if order.payment_method == 'virtual_card' and old_status in ['paid', 'approved', 'shipped']:
+            try:
+                user_card = SokohubCard.objects.get(user=order.customer)
+                user_card.balance += order.total
+                user_card.save()
+
+                # Add a refund notification for customer
+                Notification.objects.create(
+                    user=order.customer,
+                    title="Order Refunded",
+                    message=f"Your payment of ${order.total} for order #{order.id} has been refunded to your Sokohub Card.",
+                    notification_type='order_update',
+                    target_url=reverse('sokohub_card_details')
+                )
+            except SokohubCard.DoesNotExist:
+                pass
         
         messages.success(request, f"Order #{order.id} has been cancelled.")
 

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg overflow-hidden">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h2 class="mb-0 font-weight-bold"><i class="fas fa-id-card mr-2"></i> Your Sokohub Card</h2>
+                    <p class="mb-0 text-white-50">Active Membership Details</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <!-- Visual Card Representation -->
+                            <div class="sokohub-card-visual p-4 rounded-lg shadow-lg position-relative"
+                                style="background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); color: white; min-height: 220px; border-radius: 15px;">
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <h4 class="font-weight-bold m-0">SokoHub</h4>
+                                    <i class="fas fa-wifi fa-rotate-90"></i>
+                                </div>
+                                <div class="mb-4">
+                                    <img src="https://img.icons8.com/color/48/000000/chip.png" alt="Card Chip"
+                                        style="width: 40px; filter: brightness(1.2);">
+                                </div>
+                                <div class="card-number mb-2"
+                                    style="font-family: 'Courier New', Courier, monospace; letter-spacing: 2px; font-size: 1.2rem;">
+                                    {{ card.card_number|slice:":4" }} {{ card.card_number|slice:"4:8" }} {{
+                                    card.card_number|slice:"8:12" }} {{ card.card_number|slice:"12:16" }}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <div>
+                                        <small class="d-block text-white-50"
+                                            style="font-size: 0.6rem; text-transform: uppercase;">Card Holder</small>
+                                        <div class="font-weight-bold text-truncate" style="max-width: 150px;">{{
+                                            request.user.get_full_name|default:request.user.username }}</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <small class="d-block text-white-50"
+                                            style="font-size: 0.6rem; text-transform: uppercase;">Balance</small>
+                                        <div class="font-weight-bold">${{ card.balance }}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <small class="d-block text-white-50"
+                                            style="font-size: 0.6rem; text-transform: uppercase;">Expires</small>
+                                        <div class="font-weight-bold">PERPETUAL</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 px-lg-5">
+                            <h4 class="font-weight-bold mb-4">Card Information</h4>
+                            <div class="list-group list-group-flush border-top">
+                                <div
+                                    class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-center">
+                                    <span class="text-muted"><i class="fas fa-hashtag mr-2"></i> Virtual ID</span>
+                                    <span class="font-weight-bold text-primary">{{ card.virtual_id }}</span>
+                                </div>
+                                <div
+                                    class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-center">
+                                    <span class="text-muted"><i class="fas fa-check-circle mr-2"></i> Status</span>
+                                    <span class="badge badge-success px-3 py-2">Approved & Active</span>
+                                </div>
+                                <div
+                                    class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-center">
+                                    <span class="text-muted"><i class="fas fa-wallet mr-2"></i> Balance</span>
+                                    <span class="font-weight-bold text-success" style="font-size: 1.2rem;">${{
+                                        card.balance }}</span>
+                                </div>
+                                <div
+                                    class="list-group-item px-0 py-3 bg-transparent d-flex justify-content-between align-items-center border-bottom-0">
+                                    <span class="text-muted"><i class="fas fa-gift mr-2"></i> Benefit</span>
+                                    <span class="text-success font-weight-bold">5% Discount</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <a href="{% url 'top_up_card' %}" class="btn btn-outline-primary btn-block mb-3">
+                                    <i class="fas fa-plus-circle mr-2"></i> Add Money to Card
+                                </a>
+                                <div class="alert alert-info py-2 px-3 small border-0 shadow-sm"
+                                    style="border-radius: 10px;">
+                                    <i class="fas fa-lightbulb mr-2"></i> Use your **Virtual ID** at checkout on
+                                    Promotion Days to see your savings!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light p-4 text-center">
+                    <a href="{% url 'product_list' %}" class="btn btn-primary px-4 shadow-sm">
+                        <i class="fas fa-shopping-cart mr-2"></i> Start Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rounded-lg {
+        border-radius: 1rem !important;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175) !important;
+    }
+</style>
+{% endblock %}

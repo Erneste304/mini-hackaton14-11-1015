@@ -60,4 +60,39 @@ class EmailOTP(models.Model):
     def __str__(self):
         return f"OTP for {self.email} - {self.otp}"
 
+class SokohubCard(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('approved', 'Approved'),
+    )
 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='sokohub_card')
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    card_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    virtual_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def generate_card_details(self):
+        if not self.card_number:
+            # Generate a 16-digit card number format: 5050 XXXX XXXX XXXX
+            random_digits = ''.join(random.choices(string.digits, k=12))
+            self.card_number = f"5050{random_digits}"
+        
+        if not self.virtual_id:
+            # Generate a Virtual ID: SH-XXXXXX
+            random_id = ''.join(random.choices(string.digits + string.ascii_uppercase, k=6))
+            self.virtual_id = f"SH-{random_id}"
+        self.save()
+
+    def __str__(self):
+        return f"Sokohub Card for {self.user.username} - {self.status}"
+
+    class Meta:
+        verbose_name = "Sokohub Card"
+        verbose_name_plural = "Sokohub Cards"

@@ -1,6 +1,6 @@
 ﻿from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from .models import User, SokohubCard
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
@@ -67,3 +67,12 @@ class UserRegistrationForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("This email address is already registered.")
         return email
+
+class SokohubCardRequestForm(forms.ModelForm):
+    class Meta:
+        model = SokohubCard
+        fields = ['email', 'phone']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Valid Email Address'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Active Phone Number'}),
+        }

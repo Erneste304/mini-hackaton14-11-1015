@@ -6,10 +6,10 @@ from django.contrib.auth import login, authenticate, logout
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .forms import UserRegistrationForm, UserProfileForm
-from django.db.models import Q
-from .models import User
+from .forms import UserRegistrationForm, UserProfileForm, SokohubCardRequestForm
+from .models import User, SokohubCard
 from .decorators import vendor_required, customer_required
+from decimal import Decimal
 
 
 
@@ -314,5 +314,103 @@ def verify_otp_direct(request):
             messages.error(request, "User associated with this link does not exist.")
             return redirect('login')
     else:
-        messages.error(request, "The verification link is invalid or has expired.")
-        return redirect('login')
+        pass
+
+@login_required
+def request_sokohub_card(request):
+    """View to request a Sokohub Card"""
+    # Check if user already has a card
+    card = SokohubCard.objects.filter(user=request.user).first()
+    if card:
+        if card.status == 'approved':
+            return redirect('sokohub_card_details')
+        return redirect('pay_sokohub_card')
+
+    if request.method == 'POST':
+        form = SokohubCardRequestForm(request.POST)
+        if form.is_valid():
+            card = form.save(commit=False)
+            card.user = request.user
+            card.save()
+            messages.success(request, "Card request submitted! Please proceed to payment.")
+            return redirect('pay_sokohub_card')
+    else:
+        form = SokohubCardRequestForm(initial={'email': request.user.email, 'phone': request.user.phone})
+
+    return render(request, 'accounts/sokohub_card_request.html', {
+        'form': form,
+        'title': 'Request Sokohub Card'
+    })
+
+
+@login_required
+def pay_sokohub_card(request):
+    """View to simulate payment for Sokohub Card"""
+    card = get_object_or_404(SokohubCard, user=request.user)
+    
+    if card.status == 'approved':
+        return redirect('home')
+
+    if request.method == 'POST':
+        # Simulate payment
+        card.status = 'paid'
+        card.is_active = True # Auto-approve for demo
+        card.status = 'approved'
+        card.save()
+
+        # Generate unique card details
+        card.generate_card_details()
+        
+        # Notify user
+        from notifications.models import Notification
+        # Notify user of approval
+        Notification.objects.create(
+            user=request.user,
+            title="Sokohub Card Approved",
+            message="Your Sokohub Card has been approved. You can now enjoy 5% discounts on promotion days!",
+            notification_type='system'
+        )
+
+        messages.success(request, "Payment successful! Your Sokohub Card is now active.")
+        return redirect('home')
+
+    return render(request, 'accounts/sokohub_card_payment.html', {
+        'card': card,
+        'title': 'Pay for Sokohub Card'
+    })
+
+
+@login_required
+def sokohub_card_details(request):
+    """View to display the active Sokohub Card details"""
+    card = get_object_or_404(SokohubCard, user=request.user, status='approved')
+    
+    return render(request, 'accounts/sokohub_card_details.html', {
+        'card': card,
+        'title': 'My Sokohub Card'
+    })
+
+
+@login_required
+def top_up_card(request):
+    """View to add money to Sokohub Card balance"""
+    card = get_object_or_404(SokohubCard, user=request.user, status='approved')
+    
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        try:
+            amount = float(amount)
+            if amount > 0:
+                card.balance += Decimal(str(amount))
+                card.save()
+                messages.success(request, f"Successfully added ${amount:.2f} to your card balance!")
+                return redirect('sokohub_card_details')
+            else:
+                messages.error(request, "Please enter a valid positive amount.")
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid amount entered.")
+            
+    return render(request, 'accounts/sokohub_card_topup.html', {
+        'card': card,
+        'title': 'Top Up Card Balance'
+    })
