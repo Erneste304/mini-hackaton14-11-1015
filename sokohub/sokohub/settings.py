@@ -23,6 +23,17 @@ ALLOWED_HOSTS = ['.render.com', 'localhost', '127.0.0.1']
 if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
     ALLOWED_HOSTS.append(os.getenv('RENDER_EXTERNAL_HOSTNAME'))
 
+# CSRF settings for production
+CSRF_TRUSTED_ORIGINS = ['https://*.render.com']
+if os.getenv('RENDER_EXTERNAL_HOSTNAME'):
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}")
+
+# HTTPS settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = os.getenv('RENDER') is not None
+SESSION_COOKIE_SECURE = os.getenv('RENDER') is not None
+CSRF_COOKIE_SECURE = os.getenv('RENDER') is not None
+
 
 # Application definition
 
