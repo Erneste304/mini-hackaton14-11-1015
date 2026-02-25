@@ -18,4 +18,4 @@ def mark_notification_read(request, notification_id):
     
     if request.user.user_type == 'vendor':
         return redirect('vendor_dashboard')
-    return redirect('home')
+    return redirect('customer_orders')
