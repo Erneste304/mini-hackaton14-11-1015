@@ -6,23 +6,14 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --no-input
 
-# Clean up manually created tables from previous fixes if they exist, so standard migrations can run cleanly
-python -c "
-import os
-import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'sokohub.settings')
-django.setup()
-from django.db import connection
-try:
-    with connection.cursor() as cursor:
-        cursor.execute('DROP TABLE IF EXISTS socialaccount_socialapp_sites CASCADE;')
-        cursor.execute('DROP TABLE IF EXISTS django_site CASCADE;')
-        cursor.execute(\"DELETE FROM django_migrations WHERE app='sites';\")
-except Exception as e:
-    print('Cleanup skipped or failed:', e)
-"
+# 1. First, fake apply sites to prevent the socialaccount dependency error
+python db_fix.py
 
-# Run normal Django migrations
+# 2. Run normal Django migrations. This creates socialaccount tables if they don't exist.
 python manage.py migrate
 
+# 3. Create socialaccount_socialapp_sites M2M table AND ensure Site ID=1 exists to fix 500 error!
+POST_MIGRATE=1 python db_fix.py
+
+# 4. Print migrations for debugging via Render logs
 python manage.py showmigrations
