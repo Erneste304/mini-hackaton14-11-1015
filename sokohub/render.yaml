@@ -3,7 +3,7 @@ services:
     name: sokohub
     env: python
     buildCommand: ./build.sh
-    startCommand: gunicorn sokohub.wsgi
+    startCommand: gunicorn sokohub.wsgi --bind 0.0.0.0:$PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
