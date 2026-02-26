@@ -17,9 +17,12 @@ try:
     with connection.cursor() as cursor:
         cursor.execute('DROP TABLE IF EXISTS socialaccount_socialapp_sites CASCADE;')
         cursor.execute('DROP TABLE IF EXISTS django_site CASCADE;')
+        cursor.execute("DELETE FROM django_migrations WHERE app='sites';")
 except Exception as e:
     print('Cleanup skipped or failed:', e)
 "
 
 # Run normal Django migrations
 python manage.py migrate
+
+python manage.py showmigrations
