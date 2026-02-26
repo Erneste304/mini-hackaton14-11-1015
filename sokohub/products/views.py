@@ -12,8 +12,8 @@ from orders.models import OrderItem
 
 def home(request):
     """Homepage view with features and categories"""
-    featured_products = Product.objects.filter(status='active').order_by('-created_at')[:8]
-    trending_products = Product.objects.filter(status='active', is_trending=True).order_by('-created_at')[:8]
+    featured_products = Product.objects.filter(status='active').select_related('category').order_by('-created_at')[:8]
+    trending_products = Product.objects.filter(status='active', is_trending=True).select_related('category').order_by('-created_at')[:8]
     categories = Category.objects.annotate(product_count=Count('products')).filter(product_count__gt=0)[:4]
     
     # Fallback categories if none have products yet
