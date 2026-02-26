@@ -10,8 +10,7 @@ from .forms import UserRegistrationForm, UserProfileForm, SokohubCardRequestForm
 from .models import User, SokohubCard
 from .decorators import vendor_required, customer_required
 from decimal import Decimal
-
-
+from django.db.models import Q
 
 
 def register(request):
