@@ -29,7 +29,7 @@ def fake_sites_migration():
         # so it thinks 'sites' 0001_initial was applied *before* 'socialaccount'
         cursor.execute("""
             INSERT INTO django_migrations (app, name, applied)
-            SELECT 'sites', '0001_initial', NOW()
+            SELECT 'sites', '0001_initial', CURRENT_TIMESTAMP
             WHERE NOT EXISTS (
                 SELECT 1 FROM django_migrations WHERE app = 'sites' AND name = '0001_initial'
             );
