@@ -120,9 +120,16 @@ def login_view(request):
             )
             try:
                 send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
-                print("DEBUG: Email sent successfully")
+                sys.stderr.write(f"DEBUG: OTP email sent successfully to {user.email}\n")
             except Exception as e:
-                print(f"DEBUG: Email sending failed: {e}")
+                sys.stderr.write(f"DEBUG: Email sending failed: {e}\n")
+                messages.error(
+                    request,
+                    "We couldn't send the verification email due to a server issue. "
+                    "Please try again later or contact support."
+                )
+                context = {'title': 'Login - Soko Hub'}
+                return render(request, 'accounts/login.html', context)
 
             # Defer full login until OTP is verified
             request.session['pending_user_id'] = user.id
@@ -202,27 +209,38 @@ def send_otp(request):
 
         try:
             user = User.objects.get(email=email)
-            # Generate 5-digit random OTP
-            otp_code = ''.join(random.choices(string.digits, k=5))
-            
-            # Save OTP to database
-            from .models import EmailOTP
-            EmailOTP.objects.create(email=email, otp=otp_code)
-
-            # Send Email
-            from django.core.mail import send_mail
-            from django.conf import settings
-            
-            subject = "Your Soko Hub Login OTP"
-            message = f"Hello {user.username},\n\nYour 5-digit login OTP is: {otp_code}\n\nThis code will expire in 5 minutes."
-            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
-
-            request.session['otp_email'] = email
-            messages.success(request, f"A 5-digit OTP has been sent to {email}.")
-            return redirect('verify_otp')
         except User.DoesNotExist:
             messages.error(request, "This email is not registered.")
-            return redirect('login')
+            return render(request, 'accounts/send_otp.html', {'title': 'Send OTP - Soko Hub'})
+
+        # Generate 5-digit random OTP
+        otp_code = ''.join(random.choices(string.digits, k=5))
+        
+        # Save OTP to database
+        from .models import EmailOTP
+        EmailOTP.objects.create(email=email, otp=otp_code)
+
+        # Send Email
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        subject = "Your Soko Hub Login OTP"
+        message = f"Hello {user.username},\n\nYour 5-digit login OTP is: {otp_code}\n\nThis code will expire in 5 minutes."
+        try:
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+            sys.stderr.write(f"DEBUG: OTP email sent to {email}\n")
+        except Exception as mail_err:
+            sys.stderr.write(f"DEBUG: Failed to send OTP email: {mail_err}\n")
+            messages.error(
+                request,
+                "We couldn't send the OTP email due to a server issue. "
+                "Please try logging in with your username and password instead."
+            )
+            return render(request, 'accounts/send_otp.html', {'title': 'Send OTP - Soko Hub'})
+
+        request.session['otp_email'] = email
+        messages.success(request, f"A 5-digit OTP has been sent to {email}.")
+        return redirect('verify_otp')
     
     return render(request, 'accounts/send_otp.html', {'title': 'Send OTP - Soko Hub'})
 
