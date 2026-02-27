@@ -6,14 +6,14 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --no-input
 
-# 1. First, fake apply sites to prevent the socialaccount dependency error
-python db_fix.py
+# 1. Pre-migration: fake the sites migration record so allauth doesn't error
+python setup_render.py pre
 
-# 2. Run normal Django migrations. This creates socialaccount tables if they don't exist.
-python manage.py migrate
+# 2. Run all Django migrations
+python manage.py migrate --run-syncdb
 
-# 3. Create socialaccount_socialapp_sites M2M table AND ensure Site ID=1 exists to fix 500 error!
-POST_MIGRATE=1 python db_fix.py
+# 3. Post-migration: ensure Site ID=1 has correct domain + Google SocialApp is configured
+python setup_render.py post
 
-# 4. Print migrations for debugging via Render logs
+# 4. Show migration status for debugging in Render logs
 python manage.py showmigrations
